@@ -1,0 +1,33 @@
+footer{
+	text-align: center;
+	padding: 2rem 1rem;
+	margin: auto;
+	color: #333;
+}
+
+footer h3{
+	font-size: 3rem;
+	margin-bottom: 0;
+}
+
+/* GO TO TOP BUTTON */
+#go-top-btn{
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    padding: 15px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+}
+
+#go-top-btn:hover{
+    background-color: #bbb; /* Add a dark-grey background on hover */
+}
+/* END-GO TO TOP BUTTON */

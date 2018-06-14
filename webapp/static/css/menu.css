@@ -1,0 +1,21 @@
+.sites-menu-wrapper{
+    position: fixed;
+    width: 100%;
+}
+#sites-menu{
+    background: rgba(0,0,0,0.3);
+    max-width: 900px;
+    margin:auto;
+    text-align: center;
+}
+
+#sites-menu .item{
+    font-size: 1.3rem;
+    color: #eee;
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+}
+
+.item.logo{
+    background: url('https://source.unsplash.com/VCLNNMRl07k/25x25');
+}

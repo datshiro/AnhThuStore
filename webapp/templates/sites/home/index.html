@@ -1,0 +1,62 @@
+{% extends "sites/common/layout.html" %}
+	{% block css %}
+	<link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
+	{% endblock %}
+
+	{% block content %}
+	<main>
+		<!-- Landing Area -->
+		<div id="landing">
+			<div id="landing-text">
+				<div id="landing-text-inner">
+					<h1>Acme Photography</h1>
+					<h2>Beautiful Natural Photography</h2>
+					<a href="#images" class="btn" id=view-work>View Work</a>
+				</div>
+			</div>
+			<div id="landing-image"></div>
+		</div>
+
+		<div id="images">
+			<div id="header">
+				<h2>Our Work</h2>
+			</div>
+
+			<img src="https://source.unsplash.com/1600x900/?nature,water" alt="">
+			<div class="caption">
+				<h3>Photo One</h3>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+			</div>
+			<img src="https://source.unsplash.com/1600x900/?nature,trees" alt="">
+			<div class="caption">
+				<h3>Photo Two</h3>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+			</div>
+			<img src="https://source.unsplash.com/1600x900/?nature,flowers" alt="">
+			<div class="caption">
+				<h3>Photo Three</h3>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+			</div>
+			<img src="https://source.unsplash.com/1600x900/?nature,families" alt="">
+			<div class="caption">
+				<h3>Photo Four</h3>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+			</div>
+			<img src="https://source.unsplash.com/1600x900/?nature,animals" alt="">
+			<div class="caption">
+				<h3>Photo Five</h3>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
+			</div>
+		</div>
+	</main>
+	{% endblock %}
+	{% block footer %}
+		{% include ('sites/common/footer.html') %}
+	{% endblock %}
+
+	{% block script %}
+	<script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/main.js')}}"></script>
+	{% endblock %}
+</body>
+</html>

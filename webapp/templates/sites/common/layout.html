@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='semantic/dist/semantic.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+
+	<title>{% block title %}Acme Photography{% endblock %}</title>
+    {% block css %}
+    {% endblock %}
+</head>
+<body>
+    {% block menu %}
+        {% include ('sites/common/menu.html') %}
+    {% endblock %}
+
+    <div class="ui container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    {% block footer %}
+    {% endblock %}
+
+    {% block script %}
+    {% endblock %}
+    <script src="{{ url_for('static', filename='semantic/dist/semantic.min.js') }}"></script>
+</body>
+</html>
