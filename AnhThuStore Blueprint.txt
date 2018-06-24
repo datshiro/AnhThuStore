@@ -1,0 +1,18 @@
+Anh Thu Store
+- Homepage
+- Products Page
+- Product Detail Page
+- Cart
+- Order
+
+
+
+Models:
+- Product:
+    + Name
+    + Price
+    
+- Cart:
+    +
+
+- Order:

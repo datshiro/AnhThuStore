@@ -7,4 +7,4 @@ module = Module('shop', __name__, url_prefix='/shop')
 
 @module.get('/')
 def products():
-    return render_template('sites/home/index.html')
+    return render_template('sites/shop/index.html')
