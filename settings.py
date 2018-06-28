@@ -4,3 +4,5 @@ DEBUG = True
 MONGODB_DB = 'anhthudb'
 MONGODB_HOST = 'localhost'
 DEFAULT_CONNECTION_NAME = 'anhthudb'
+
+SESSION_KEY = 'sessionId'

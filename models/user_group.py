@@ -6,7 +6,7 @@ from flask_mongoengine import Document
 class UserGroup(Document):
     name = StringField(required=True, unique=True, min_length=3)
     short_description = StringField(required=True, min_length=3)
-    permissions = ListField(field=StringField(), required=True)
+    permissions = ListField(field=StringField())
 
     @staticmethod
     def get_permission_list(regroup=True):
@@ -22,6 +22,7 @@ class UserGroup(Document):
 
     def __str__(self):
         return self.name
+
 
 def permissions():
     return [
