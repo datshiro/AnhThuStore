@@ -7,5 +7,4 @@ module = Module('shop', __name__, url_prefix='/shop')
 
 @module.get('/')
 def products():
-    flash('Vui lòng kiểm tra lại user/mật khẩu', 'warning')
     return render_template('sites/shop/index.html')

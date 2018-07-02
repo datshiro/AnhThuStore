@@ -7,11 +7,16 @@
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='semantic/dist/semantic.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/home/common/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/shop/common/menu.css') }}">
+
     {% block css %}
     {% endblock %}
 	<title>{% block title %}Anh Thu Shop{% endblock %}</title>
 </head>
 <body>
+	{% include 'sites/home/common/menu.html' %}
+
 	<div class="wrapper">
 		{% include 'sites/messages.html' %}
 
@@ -21,13 +26,11 @@
 
 		<!-- Footer -->
         {% block footer %}
-		<footer>
-			<p>Dat Shiro &copy; 2018 </p>
-		</footer>
-        {% endblock %}
+    		{% include ('sites/home/common/footer.html') %}
+    	{% endblock %}
 	</div>
 	<!-- Wrapper Ends -->
     <script src="{{ url_for('static', filename='semantic/dist/semantic.min.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

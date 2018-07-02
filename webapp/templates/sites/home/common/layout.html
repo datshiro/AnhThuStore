@@ -6,8 +6,8 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='semantic/dist/semantic.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/home/common/menu.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/sites/home/common/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/home/common/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/home/common/style.css') }}">
 
 	<title>{% block title %}Acme Photography{% endblock %}</title>
     {% block css %}
@@ -18,11 +18,14 @@
         {% include ('sites/home/common/menu.html') %}
     {% endblock %}
 
-    <div class="ui container">
+    <main>
+	    {% include ('sites/messages.html') %}
 
         {% block content %}
+
         {% endblock %}
-    </div>
+    </main>
+
 
     {% block footer %}
     	{% include ('sites/home/common/footer.html') %}
@@ -30,6 +33,7 @@
 
     {% block script %}
     {% endblock %}
-    <script src="{{ url_for('static', filename='semantic/dist/semantic.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
 </body>
 </html>

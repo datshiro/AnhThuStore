@@ -54,10 +54,10 @@ class User(Document):
         raise ValidationError('Password\'s length should >= 8')
 
     @classmethod
-    def authenticate(cls, email, password):
+    def authenticate(cls, username, password):
         try:
             password = cls.encrypt_password(password)
-            user = User.objects.get(email=email, password=password)
+            user = User.objects.get(username=username, password=password)
             return user
         except DoesNotExist:
             return None

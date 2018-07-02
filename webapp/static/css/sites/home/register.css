@@ -1,0 +1,30 @@
+.wrapper{
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 50px 0;
+}
+
+#register-form{
+    width: 350px;
+    margin: 0 auto;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.form-title h1{
+    font-size: 1.2rem;
+}
+
+.group-button{
+    display: grid;
+    grid-template-columns: auto auto 40%;
+    grid-gap: 5px;
+    margin: 10px 0;
+}
+
+.register-btn{
+    grid-column-start: 3;
+}

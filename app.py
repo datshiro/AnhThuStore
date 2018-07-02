@@ -19,9 +19,9 @@ reload(sys)
 
 app = App(__name__, template_folder='./webapp/templates', static_folder='./webapp/static')
 app.config.from_object(settings)
+db = MongoEngine(app)
 
 toolbar = DebugToolbarExtension(app)
-db = MongoEngine(app)
 
 admin = Admin(app, template_mode='bootstrap3')
 admin.add_view(ModelView(User))

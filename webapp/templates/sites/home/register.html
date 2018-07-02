@@ -1,0 +1,44 @@
+{% extends 'sites/home/common/layout.html' %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sites/home/register.css') }}">
+{% endblock %}
+{% block content %}
+<div class="wrapper">
+    <div id="register-form">
+        <div class="form-title">
+            <h1>Register Form</h1>
+        </div>
+        <form method="POST" class="ui form" action=" ">
+            {{ crsf_token }}
+            {% for field in form %}
+                {% if field.type in ['CSRFTokenField', 'HiddenField'] %}
+                  {{ field() }}
+                {% else %}
+                <div class="ui field">
+                    <label>{{ field.label }} {% if field.flags.required %}*{% endif %} : </label>
+                    <div>{{ field }}</div>
+                </div>
+                {% endif %}
+                {% if field.errors or field.help_text %}
+                    <div class="ui bottom attached warning" style="color: red; padding-left: 10px;">
+                        <i class="icon cancel"></i>
+                        {% if field.errors %}
+                          {{ field.errors|join(' ') }}
+                        {% else %}
+                          {{ field.help_text }}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <div class="group-button">
+                <button class="ui button secondary register-btn" type="submit">Register</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

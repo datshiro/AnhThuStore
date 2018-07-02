@@ -1,10 +1,10 @@
 {% extends "sites/home/common/layout.html" %}
 
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sites/home/index.css') }}">
+{% endblock %}
 
 {% block content %}
-<main>
-	{% include ('sites/messages.html') %}
-
 	<!-- Landing Area -->
 	<div id="landing">
 		<div id="landing-text">
@@ -48,8 +48,8 @@
 			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
 		</div>
 	</div>
-</main>
 {% endblock %}
+
 
 {% block script %}
 <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
