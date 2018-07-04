@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from mongoengine import *
 
+from models.image import Image
+
 from datetime import datetime
 import time
 import random
@@ -24,6 +26,8 @@ class Product(Document):
     price_input = FloatField(min_value=0, default=0, verbose_name='Giá nhập sản phẩm')
     price = FloatField(min_value=0, default=0, verbose_name='Nhập giá bán')
     quantity = IntField(min_value=0, default=0, verbose_name='Số Lượng')
+    images = ListField(ReferenceField('Image', reverse_delete_rule=NULLIFY))
+    image = StringField()
 
 
     @property
@@ -58,6 +62,5 @@ class Product(Document):
     @classmethod
     def get_all(cls):
         return cls.objects().order_by('-created_at')
-
 
 

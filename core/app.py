@@ -27,3 +27,13 @@ class App(Flask):
             blueprint = getattr(mod, 'module')
 
             self.register_blueprint(blueprint)
+
+    def auto_add_template_filters(self):
+        mod = import_module('core.template_filters')
+        cls = getattr(mod,  'TemplateFilter')
+
+        tf_names = [t for t in dir(cls) if not t.startswith("__")]
+
+        for tf_name in tf_names:
+            func = getattr(cls, tf_name)
+            self.add_template_filter(func)

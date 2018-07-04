@@ -7,6 +7,7 @@
     max-width: 900px;
     margin:auto;
     text-align: center;
+    position: relative;
 }
 
 #sites-menu .item{
@@ -16,6 +17,10 @@
     padding: 0.5rem 1.2rem;
 }
 
+#sites-menu .item.logout{
+    position: absolute;
+    right: 0;
+}
 .item.logo{
     background: url('https://source.unsplash.com/VCLNNMRl07k/25x25');
 }

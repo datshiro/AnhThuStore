@@ -123,7 +123,7 @@ img{
 .boxes{
     display: grid;
     grid-gap: 20px;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .box{
@@ -131,6 +131,33 @@ img{
     text-align: center;
     padding: 1.5rem 2rem;
     box-shadow: var(--shadow);
+    text-decoration: none;
+    color: black;
+}
+
+.box img{
+    max-height: 200px;
+}
+
+.box .price {
+    font-weight: 900;
+    font-size: 1.3rem;
+    color: #242424
+}
+
+.box .image{
+    height: 200px;
+    display: block;
+}
+
+.title , .description{
+    display: block;
+    color: #242424;
+    line-height:1.38;
+    font-size: 1.2rem;
+}
+.description{
+    font-size:0.8rem;
 }
 
 /* Info */

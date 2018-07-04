@@ -2,6 +2,7 @@ from flask import request, session
 from mongoengine import DoesNotExist
 
 from models.session import Session
+from models.user import User
 from settings import SESSION_KEY
 
 

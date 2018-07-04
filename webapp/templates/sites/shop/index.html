@@ -28,27 +28,26 @@
 
 	<!-- Boxes Section -->
 	<section class="boxes">
-		<div class="box">
-			<i class="fas fa-chart-pie fa-4x"></i>
-			<h3>Analytics</h3>
-			<p>Irure consequat exercitation et laboris in pariatur elit irure dolor dolore et ut.</p>
-		</div>
-		<div class="box">
-			<i class="fas fa-globe fa-4x"></i>
-			<h3>Marketing</h3>
-			<p>Irure consequat exercitation et laboris in pariatur elit irure dolor dolore et ut.</p>
-		</div>
-		<div class="box">
-			<i class="fas fa-cog fa-4x"></i>
-			<h3>Development</h3>
-			<p>Irure consequat exercitation et laboris in pariatur elit irure dolor dolore et ut.</p>
-		</div>
-		<div class="box">
-			<i class="fas fa-users fa-4x"></i>
-			<h3>Support</h3>
-			<p>Irure consequat exercitation et laboris in pariatur elit irure dolor dolore et ut.</p>
-		</div>
-
+		{% for product in products %}
+		<a href="{{ url_for('product.detail', product_name=product.name, product_id=product.id)}}" class="box">
+			<span class="image">
+				<img src="{{product.image}}"/>
+			</span>
+			<span class="title">{{ product.name }}</span>
+			<p class="description">{{ product.description }}</p>
+			<span class="price"> {{ product.price }} </span>
+		</a>
+		{% endfor %}
+		{% for product in products %}
+		<a href="{{ url_for('product.detail', product_name=product.name, product_id=product.id)}}" class="box">
+			<span class="image">
+				<img src="{{product.image}}"/>
+			</span>
+			<span class="title">{{ product.name }}</span>
+			<p class="description">{{ product.description }}</p>
+			<span class="price"> {{ product.price }} </span>
+		</a>
+		{% endfor %}
 	</section>
 
 	<!-- Info Section -->

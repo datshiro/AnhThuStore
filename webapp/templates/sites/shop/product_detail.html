@@ -1,0 +1,36 @@
+{% extends 'sites/shop/common/layout.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/shop/product_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div id="container">
+    <div id="product-image">
+        <div class="image">
+            <img src="{{ product.image }}" />
+        </div>
+    </div>
+    <div id="product-detail">
+        <h1 class="title">{{ product.name }}</h1>
+        <span class="price">{{ product.price | price }} đ</span>
+        <div class="description">
+            <p>
+                {{ product.description }}
+            </p>
+        </div>
+        <div class="add-cart-action">
+            <div class="quantity-box">
+                <div class="quantity-col">
+                    <span class="quantity-label">Quantity:</span>
+                    <input class="quantity-input" value="1" type="number" name="quantity">
+                </div>
+            </div>
+            <div class="add-cart-box">
+                <button class="ui button yellow">Add to cart</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
