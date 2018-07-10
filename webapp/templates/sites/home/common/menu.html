@@ -5,10 +5,11 @@
         <a class="item" href="{{ url_for('home.index') }}">Home</a>
         <a class="item" href="{{ url_for('shop.shop') }}">Shop</a>
         {% if not request.user %}
-        <a class="item" href="{{ url_for('home.login') }}">Sign-in</a>
+            <a class="item" href="{{ url_for('home.login') }}">Sign-in</a>
         {% else %}
-        <a class="item" href="{{ url_for('home.profile') }}">{{ request.user.name }}</a>
-        <a class="item logout" href="{{ url_for('home.logout') }}">Log out <i class="sign out alternate icon"></i></a>
+            <a class="item" href="{{ url_for('home.profile') }}">{{ request.user.name }}</a>
+            <a class="item logout" href="{{ url_for('home.logout') }}">Log out <i class="sign out alternate icon"></i></a>
         {% endif %}
+        <a class="item" href="{{ url_for('shop.checkout') }}"><i class="cart icon"></i></a>
     </div>
 </div>

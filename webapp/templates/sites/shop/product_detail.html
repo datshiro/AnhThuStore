@@ -13,24 +13,29 @@
     </div>
     <div id="product-detail">
         <h1 class="title">{{ product.name }}</h1>
+        <input id="product-id" type="hidden" value="{{product.id}}" name="id">
         <span class="price">{{ product.price | price }} đ</span>
         <div class="description">
             <p>
                 {{ product.description }}
             </p>
         </div>
-        <div class="add-cart-action">
+        <form id="add-to-cart-form" class="add-cart-action" action="{{ url_for('shop.add_to_cart', product_id = product.id, quantity = 1) }}">
             <div class="quantity-box">
                 <div class="quantity-col">
                     <span class="quantity-label">Quantity:</span>
-                    <input class="quantity-input" value="1" type="number" name="quantity">
+                    <input class="quantity-input" min="0" value="1" type="number" name="quantity">
+                    <input type="hidden" name="product_id" value="{{ product.id }}" />
                 </div>
             </div>
             <div class="add-cart-box">
-                <button class="ui button yellow">Add to cart</button>
+                <button type="submit" class="ui button yellow">Add to cart</button>
             </div>
-
-        </div>
+        </form>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/cart.js')}}"></script>
 {% endblock %}

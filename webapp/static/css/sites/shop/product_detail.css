@@ -44,8 +44,18 @@
 }
 
 .quantity-box{
-    margin: auto;
+    margin: auto 15px;
 }
 .add-cart-action{
     display: flex;
+    margin: auto;
+    flex-wrap: wrap;
+}
+
+@media(max-width:800px){
+    #container{
+        width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
+        height: auto;
+    }
 }

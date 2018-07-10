@@ -30,6 +30,8 @@
     	{% endblock %}
 	</div>
 	<!-- Wrapper Ends -->
+    {% block script %}
+    {% endblock %}
     <script src="{{ url_for('static', filename='semantic/dist/semantic.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
