@@ -17,3 +17,14 @@ function addToCart(e){
     }
     updateCart(post_data.product_id, post_data.quantity);
 }
+
+function removeFromCart(e){
+    product_id = e.target.id;
+    function updateCart(product_id){
+        $.post("/shop/remove-from-cart/"+product_id)
+            .done(function(data){
+                location.reload();
+            });
+    }
+    updateCart(product_id);
+}

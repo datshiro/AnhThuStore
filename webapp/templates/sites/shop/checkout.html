@@ -1,1 +1,53 @@
 {% extends 'sites/shop/common/layout.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/shop/checkout.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1 class="title" style="text-align: center">
+        CHECK OUT
+    </h1>
+    <form id="summary-cart" method="post">
+        <table class="ui fixed celled unstackable table large" id="cart-table" >
+            <thead  class="full-width">
+                <th>Order Id:</th>
+                <th>#12345</th>
+            </thead>
+            <thead>
+                <th>Total Cart:</th>
+                <th>{{ cart.sum_value | price }}</th>
+            </thead>
+        </table>
+        <h2>Payment Methods</h2>
+    </form>
+    <form id="bank-form" class="ui form">
+        <div class="field">
+            <label style="font-size: 1.3rem; font-weight: 600;">Bank:</label>
+
+            <select name="bank-name" style="width: 200px;">
+                <option value="0">Select Bank:</option>
+                <option value="vietcombank">Vietcombank</option>
+                <option value="sacombank">Sacombank</option>
+                <option value="agribank">Agribank</option>
+            </select>
+        </div>
+        <div class="field">
+            <label style="font-size: 1.3rem; font-weight: 600;">Card ID:</label>
+            <input type="text" name="card-id" placeholder="Enter Card Id" class="ui input">
+        </div>
+
+        <div class="btn-wrapper" style="text-align: right;">
+            <a href="#" class="ui button primary" id="purchase-btn" onclick="makePurchaseRequest({{oi}})">Check Out</a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/checkout.js')}}"></script>
+    <script src="https://bitwiseshiftleft.github.io/sjcl/sjcl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/mode-cfb.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/aes.js"></script>
+
+{% endblock %}

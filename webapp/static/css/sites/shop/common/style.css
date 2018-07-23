@@ -37,6 +37,7 @@ img{
 .wrapper{
     display: grid;
     grid-gap: 20px;
+    padding-top: 40px;
 }
 
 /* Navigation */
@@ -162,6 +163,11 @@ img{
 }
 .description{
     font-size:0.8rem;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    max-height: 1.8em;
+    line-height: 1.8em;
+    overflow: hidden;
 }
 
 /* Info */
@@ -193,6 +199,7 @@ footer{
     color: var(--light);
     text-align: center;
     padding: 1rem;
+    width: 100%;
 }
 
 /* Media Queries */

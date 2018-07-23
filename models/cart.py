@@ -1,6 +1,8 @@
 from flask import request
 import json
 
+from models.product import Product
+
 
 class Cart(object):
     data = {}
@@ -30,3 +32,26 @@ class Cart(object):
         data[product_id] = quantity
         self.data['products'] = data
 
+    def remove_product(self, product_id):
+        data = self.products_data
+        data.pop(product_id)
+        self.data['products'] = data
+
+    @property
+    def sum_value(self):
+        products = self.products_data
+        sum = 0
+        for k,v in products.items():
+            product = Product.objects.get(pk=k)
+            sum += (product.price * v)
+            product.quantity -= v
+            product.save()
+        return sum
+
+    @property
+    def products(self):
+        products = []
+        for k, v in self.products_data.items():
+            product = Product.objects.get(pk=k)
+            products.append(product)
+        return products

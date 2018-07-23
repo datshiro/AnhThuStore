@@ -14,6 +14,10 @@ class App(Flask):
 
         self._register('sites', sites_path)
 
+        mod = import_module('webapp.views.api')
+        api = getattr(mod, 'module')
+        self.register_blueprint(api)
+
     def _register(self, segment, segment_path):
         for item in listdir(segment_path):
             if '__init__' in item or '.pyc' in item:
