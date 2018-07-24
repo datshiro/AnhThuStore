@@ -12,11 +12,11 @@
         <table class="ui fixed celled unstackable table large" id="cart-table" >
             <thead  class="full-width">
                 <th>Order Id:</th>
-                <th>#12345</th>
+                <th id="order-id">#12345</th>
             </thead>
             <thead>
                 <th>Total Cart:</th>
-                <th>{{ cart.sum_value | price }}</th>
+                <th id="order-sum">{{ cart.sum_value | price }}</th>
             </thead>
         </table>
         <h2>Payment Methods</h2>
@@ -38,7 +38,7 @@
         </div>
 
         <div class="btn-wrapper" style="text-align: right;">
-            <a href="#" class="ui button primary" id="purchase-btn" onclick="makePurchaseRequest({{oi}})">Check Out</a>
+            <a href="#" class="ui button primary" id="purchase-btn" onclick="initPurchase()">Check Out</a>
         </div>
     </form>
 {% endblock %}

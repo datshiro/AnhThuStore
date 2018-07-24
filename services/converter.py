@@ -8,4 +8,11 @@ def bytes_to_array(b):
 
 
 def hex_to_bytes(hex_string):
+    if hex_string is None:
+        return ""
     return bytes([b for b in bytearray.fromhex(hex_string)])
+
+def hex_to_array(hex_string):
+    if hex_string is None:
+        return ""
+    return [b for b in bytearray.fromhex(hex_string)]
