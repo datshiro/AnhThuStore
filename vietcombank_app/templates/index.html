@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='semantic/dist/semantic.min.css') }}">
+    <script src="{{ url_for('static', filename='semantic/dist/semantic.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <title>Vietcombank</title>
+</head>
+<body>
+    <div class="top">
+        <div class="logo">
+
+        </div>
+    </div>
+    <div class="ui container">
+        <h1>Welcome to Vietcombank Website</h1>
+        <div class="form-wrapper">
+            <h2>Please login to check your acount info</h2>
+            <form method="POST" class="ui form" action=" ">
+                <div class="inline fields">
+                    <label for="card-id">Card ID :  </label>
+                    <input name="card-id" class="ui input" id="card-id" type="text">
+                </div>
+
+                <div class="inline fields">
+                    <label for="password">Password: </label>
+                    <input name="password" class="ui input" id="password" type="password">
+                </div>
+                <div class="group-button">
+                    <a href="{{ url_for ('home.register') }}" class="ui button secondary register-btn">Register</a>
+                    <button class="ui button primary login-btn" type="submit">Login</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</body>
+</html>

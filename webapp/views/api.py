@@ -92,7 +92,8 @@ def make_purchase_request():
 
         response = make_response(json({'status': 'OK'}))
     else:
-        response = make_response(json({'status': 'NO'}))
+        msg = 'message went wrong during transmission, hashes dont match'
+        response = make_response(json({'status': 'NO', 'message': msg}))
 
     # Decrypt Merchant part
     # merchant_part_encrypted = bytes_to_array(merchant_part_encrypted.encode())

@@ -74,8 +74,13 @@ def test():
 		print("k1", k1, bytes_to_array(k1))
 
 		if ds_check(oimd, pi, ds, k1, iv1, merchant=False):
-
+			pi = JSON.loads(pi)
+			
 			pass
+		else:
+			msg = 'message went wrong during transmission, hashes dont match'
+	else:
+		msg = 'Authdata went wrong during transmission, failed to verify signature'
 
 	return "OK"
 

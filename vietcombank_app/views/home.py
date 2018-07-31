@@ -1,0 +1,55 @@
+from flask import render_template, request, url_for
+from flask_mail import Message
+from werkzeug.utils import redirect
+
+from core.module import Module
+from models.card import Card, NotUniqueError
+from vietcombank_app.forms import RegisterForm
+
+module = Module('home', __name__)
+
+
+@module.get_post('/')
+def index():
+    if request.method == 'POST':
+        data = request.form
+        card_id = data.get('card-id')
+        password = data.get('password')
+
+        card = Card.authenticate(card_id, password)
+        if card:
+            return render_template('profile.html', card=card)
+    return render_template('index.html')
+
+
+@module.get_post('/register')
+def register():
+    form = RegisterForm(request.form)
+    if request.method == 'POST' and form.validate():
+        data = (request.form).to_dict()
+        data.pop('csrf_token', None)
+
+        card = Card(**data)
+        card.save()
+
+        from vietcombank import mail
+        msg = render_template('register-email.html', card=card)
+        message = Message(subject="Đăng ký thành công thẻ VCB-Dat Shiro",
+                      html=msg,
+                      sender=("VCB-Dat Shiro","datshiro@gmail.com"),
+                      recipients=[card.email])
+        mail.send(message)
+
+    return render_template('register.html', form=form)
+
+
+@module.get_post('/topup')
+def topup():
+    if request.method == "POST":
+        data = request.form
+        card_id = data.get('card-id')
+        topup_amount = data.get('topup-money')
+
+        card = Card.objects.get(pk=card_id)
+        card.topup(float(topup_amount))
+    return redirect(url_for('home.index'))

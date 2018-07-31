@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='semantic/dist/semantic.min.css') }}">
+    <script src="{{ url_for('static', filename='semantic/dist/semantic.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <title>Vietcombank</title>
+</head>
+<body>
+    <div class="top">
+        <div class="logo">
+
+        </div>
+    </div>
+    <div class="ui container">
+        <h1>Register New Vietcombank Card</h1>
+        <div class="form-wrapper">
+            <form method="POST" class="ui form" action=" ">
+                {{ crsf_token }}
+                {% for field in form %}
+                    {% if field.type in ['CSRFTokenField', 'HiddenField'] %}
+                      {{ field() }}
+                    {% else %}
+                    <div class="ui field">
+                        <label>{{ field.label }} {% if field.flags.required %}*{% endif %} : </label>
+                        <div>{{ field }}</div>
+                    </div>
+                    {% endif %}
+                    {% if field.errors or field.help_text %}
+                        <div class="ui bottom attached warning" style="color: red; padding-left: 10px;">
+                            <i class="icon cancel"></i>
+                            {% if field.errors %}
+                              {{ field.errors|join(' ') }}
+                            {% else %}
+                              {{ field.help_text }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <div class="group-button">
+                    <button class="ui button secondary register-btn" type="submit">Register</button>
+                    <a class="ui button primary" href="{{url_for('home.index')}}">Home</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -245,7 +245,7 @@ function encode_info(info_object){
 
 function initPurchase(order_info) {
 
-    var bank_name = $("input[name=bank-name]").val();
+    var bank_name = $("select[name=bank-name]").val();
     var card_id = $("input[name=card-id]").val();
     var payment_info = {
         "bank_name": bank_name,
