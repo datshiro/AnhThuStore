@@ -1,3 +1,6 @@
+import base64
+
+
 def bytes_to_array(b):
     hex_string = b.hex()
     decimal_array = []
@@ -16,3 +19,11 @@ def hex_to_array(hex_string):
     if hex_string is None:
         return ""
     return [b for b in bytearray.fromhex(hex_string)]
+
+
+def decodeBase64(string):
+    return base64.b64decode(string)
+
+
+def encodeBase64(bytestring):
+    return base64.b64encode(bytestring)

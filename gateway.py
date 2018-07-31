@@ -9,7 +9,7 @@ from Crypto.PublicKey import RSA
 import requests
 import json
 
-from services.Cipher import AESCipher
+from services.Cipher import AESCipher, decrypt_aes, decrypt_rsa, verify_rsa, ds_check
 from services.converter import bytes_to_array
 from services.keys import *
 from Crypto import Random
@@ -32,26 +32,6 @@ def test():
 	k3_encrypted = base64.b64decode(b64_k3_encrypted)
 	authdata_encrypted = base64.b64decode(b64_authdata_encrypted)
 	authdata_signature = base64.b64decode(b64_authdata_signature)
-
-	def decrypt_rsa(key, ciphertext):
-		from Crypto.Cipher import PKCS1_OAEP
-		from Crypto.PublicKey import RSA
-		cipher = PKCS1_OAEP.new(key)
-		message = cipher.decrypt(ciphertext)
-		return message
-
-	def verify_rsa(pubKey, message, signature):
-		from Crypto.Signature import PKCS1_PSS
-		from Crypto.Hash import SHA
-		from Crypto.PublicKey import RSA
-		from Crypto import Random
-
-		h = SHA.new(message)
-		verifier = PKCS1_PSS.new(pubKey)
-		if verifier.verify(h, signature):
-			return True
-		else:
-			return False
 
 	#decrypt k3
 	krpg = paymentgateway
@@ -79,22 +59,23 @@ def test():
 		print("k2", k2, bytes_to_array(k2))
 
 		#Decrypt gateway_part_encrypted
-
-		def decrypt_aes(key, iv, ciphertext):
-			aes = AESCipher(key)
-			iv_ds = bytes.fromhex(iv + ciphertext)
-			return aes.decrypt(iv_ds)
-
 		gateway_part = decrypt_aes(k2, iv2, gateway_part_encrypted)
 		import json as JSON
 		gateway_part = JSON.loads(gateway_part)
 		print("gateway_part", gateway_part)
 
+		#Fetch from gateway_part
+		pi = gateway_part.get('pi')
+		oimd = gateway_part.get('oimd')
+		ds = gateway_part.get('ds')
+
 		#Decrypt k1
 		k1 = decrypt_rsa(krpg, k1_encrypted)
 		print("k1", k1, bytes_to_array(k1))
 
-		
+		if ds_check(oimd, pi, ds, k1, iv1, merchant=False):
+
+			pass
 
 	return "OK"
 

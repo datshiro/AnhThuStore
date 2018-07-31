@@ -38,8 +38,13 @@
         </div>
 
         <div class="btn-wrapper" style="text-align: right;">
-            <a href="#" class="ui button primary" id="purchase-btn" onclick="initPurchase()">Check Out</a>
+            <a href="#" class="ui button primary" id="purchase-btn" onclick="initPurchase({{oi}})">Check Out</a>
         </div>
+        <form class="hidden">
+            <input id="kum" value="{{kum}}" type="hidden">
+            <input id="kupg" value="{{kupg}}" type="hidden">
+
+        </form>
     </form>
 {% endblock %}
 

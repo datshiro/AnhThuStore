@@ -5,7 +5,7 @@ from core.module import Module
 from models.cart import Cart
 from models.product import Product, DoesNotExist
 from services import identity
-
+from services.keys import merchant, paymentgateway
 
 module = Module('shop', __name__, url_prefix='/shop')
 
@@ -22,7 +22,6 @@ def add_to_cart(product_id, quantity):
     cart.add_product(product_id, quantity)
     response = make_response()
     response.set_cookie('cart', cart.jsonified_data)
-
     flash("Add succeeded!", 'success')
     return response
 
@@ -57,6 +56,8 @@ def checkout():
     oi = cart
     oi.data['total'] = cart.sum_value
     oi = oi.jsonified_data
+    merchant_publickey = merchant.publickey().exportKey()
+    paymentgateway_publickey = paymentgateway.publickey().exportKey()
 
     products = cart.products
-    return render_template('sites/shop/checkout.html', products=products, cart=cart, oi=oi)
+    return render_template('sites/shop/checkout.html', products=products, cart=cart, oi=oi, kum=merchant_publickey, kupg=paymentgateway_publickey)

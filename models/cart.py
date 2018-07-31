@@ -1,7 +1,7 @@
 from flask import request
 import json
 
-from models.product import Product
+from models.product import Product, DoesNotExist
 
 
 class Cart(object):
@@ -44,7 +44,7 @@ class Cart(object):
         for k,v in products.items():
             product = Product.objects.get(pk=k)
             sum += (product.price * v)
-            product.quantity -= v
+            product.quantity -= v               # FIX LATER
             product.save()
         return sum
 
@@ -52,6 +52,9 @@ class Cart(object):
     def products(self):
         products = []
         for k, v in self.products_data.items():
-            product = Product.objects.get(pk=k)
-            products.append(product)
+            try:
+                product = Product.objects.get(pk=k)
+                products.append(product)
+            except DoesNotExist:
+                pass
         return products

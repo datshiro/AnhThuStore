@@ -3,7 +3,8 @@ from mongoengine import DoesNotExist
 
 from models.session import Session
 from models.user import User
-from settings import SESSION_KEY
+from services.keys import paymentgateway, merchant
+from settings import SESSION_KEY, KUM, KUPG
 
 
 def create_or_update_session():
@@ -28,4 +29,8 @@ def create_or_update_session():
 
 def set_session_cookie(response):
     response.set_cookie(SESSION_KEY, value=str(request.session.id))
+    paymentgateway_publickey = paymentgateway.publickey()
+    merchant_publickey = merchant.publickey()
+    # response.set_cookie(KUM, merchant_publickey)
+    # response.set_cookie(KUPG, paymentgateway_publickey)
     return response
