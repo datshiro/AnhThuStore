@@ -1,29 +1,31 @@
 import base64
 
-from flask import request, url_for
+from flask import request, url_for, make_response, Response
+from flask import Flask, url_for
 from flask_api import FlaskAPI, status, exceptions
 from flask import abort
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA512, SHA256
 from Crypto.PublicKey import RSA
 import requests
-import json
+import json as JSON
 
-from services.Cipher import AESCipher, decrypt_aes, decrypt_rsa, verify_rsa, ds_check
-from services.converter import bytes_to_array
+from services.Cipher import AESCipher, decrypt_aes, decrypt_rsa, verify_rsa, ds_check, encrypt_aes, encrypt_rsa, \
+	sign_message
+from services.converter import bytes_to_array, json
 from services.keys import *
 from Crypto import Random
 
 
-app = FlaskAPI(__name__)
+app = Flask(__name__)
 
-@app.route("/test", methods=["POST"])
+@app.route("/test", methods=["POST", "GET"])
 def test():
 	# if not request.json:
 	# 	abort(400)
 
 	#Fetch data
-	data = request.data.to_dict()
+	data = request.form.to_dict()
 	b64_authdata_encrypted = data.get('b64_authdata_encrypted', '')
 	b64_k3_encrypted = data.get('b64_k3_encrypted')
 	b64_authdata_signature = data.get('b64_authdata_signature')
@@ -60,7 +62,6 @@ def test():
 
 		#Decrypt gateway_part_encrypted
 		gateway_part = decrypt_aes(k2, iv2, gateway_part_encrypted)
-		import json as JSON
 		gateway_part = JSON.loads(gateway_part)
 		print("gateway_part", gateway_part)
 
@@ -74,14 +75,49 @@ def test():
 		print("k1", k1, bytes_to_array(k1))
 
 		if ds_check(oimd, pi, ds, k1, iv1, merchant=False):
-			pi = JSON.loads(pi)
-			
-			pass
+			response = requests.post("http://0.0.0.0:8003/api/authorization", data={'authdata': authdata,'pi': pi})
+			if response.status_code == 200:
+				print("bank_response", response.json())
+				bank_response = response.json()['data']
+
+				authresponse = bank_response.get('authresponse')
+				bankcertificate = bank_response.get('bankcertificate')
+
+				#Encrypt authresponse
+				k4 = Random.get_random_bytes(16)
+				authresponse_encrypted = encrypt_aes(k4, authresponse)
+
+				#Encrypt K4
+				k4_encrypted = encrypt_rsa(kum,k4)
+
+				#Sign authresponse
+				authresponse_signature = sign_message(krpg, authresponse.encode())
+
+				print("authresponse_signature", authresponse_signature)
+				print("k4_encrypted", k4_encrypted)
+				print("authresponse_encrypted", authresponse_encrypted)
+				print("bankcertificate", bankcertificate)
+
+				#Encode Base64
+				b64_authresponse_encrypted = base64.b64encode(authresponse_encrypted)
+				b64_k4_encrypted = base64.b64encode(k4_encrypted)
+				b64_authresponse_signature = base64.b64encode(authresponse_signature)
+				b64_bankcertificate = base64.b64encode(bankcertificate.encode())
+				print("b64_authresponse_encrypted", b64_authresponse_encrypted)
+				print("b64_k4_encrypted", b64_k4_encrypted)
+				print("b64_authresponse_signature", b64_authresponse_signature)
+				print("b64_bankcertificate", b64_bankcertificate)
+
+				return make_response(json({'b64_authresponse_signature': b64_authresponse_signature.decode(),
+										   'b64_k4_encrypted': b64_k4_encrypted.decode(),
+										   'b64_authresponse_encrypted': b64_authresponse_encrypted.decode(),
+										   'b64_bankcertificate': b64_bankcertificate.decode()}))
 		else:
 			msg = 'message went wrong during transmission, hashes dont match'
+			return make_response(json({'message': msg}))
 	else:
 		msg = 'Authdata went wrong during transmission, failed to verify signature'
-
+		return make_response(json(msg))
 	return "OK"
 
 @app.route("/start", methods=["POST"])

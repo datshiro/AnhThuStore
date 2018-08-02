@@ -1,4 +1,7 @@
 import base64
+from json import dumps
+
+from flask import Response
 
 
 def bytes_to_array(b):
@@ -27,3 +30,9 @@ def decodeBase64(string):
 
 def encodeBase64(bytestring):
     return base64.b64encode(bytestring)
+
+def json(data):
+    """
+    This is the function, which return json data
+    """
+    return Response(dumps({'data': data}), mimetype='application/json')

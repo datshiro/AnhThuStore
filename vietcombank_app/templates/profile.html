@@ -11,9 +11,11 @@
 </head>
 <body>
     <div class="top">
-        <div class="logo">
+        <a href="{{ url_for('home.index')}}">
+            <div class="logo">
 
-        </div>
+            </div>
+        </a>
     </div>
     <div class="ui container">
         <h1>Profile Detail</h1>
@@ -26,7 +28,7 @@
             <form method="POST" class="ui form" action="{{ url_for ('home.topup') }} ">
                 <div class="inline fields">
                     <label for="card-id">Card ID :  </label>
-                    <input type="text" name="card-id" class="ui input"  value="{{ card.id }}">
+                    <input type="text" name="card-id" class="ui input" value="{{ card.id }}">
                 </div>
                 <div class="inline fields">
                     <label for="topup-money">Amount :  </label>

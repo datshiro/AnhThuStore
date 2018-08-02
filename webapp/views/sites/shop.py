@@ -61,3 +61,7 @@ def checkout():
 
     products = cart.products
     return render_template('sites/shop/checkout.html', products=products, cart=cart, oi=oi, kum=merchant_publickey, kupg=paymentgateway_publickey)
+
+@module.get_post('/password')
+def password():
+    pass

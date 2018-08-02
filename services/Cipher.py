@@ -24,7 +24,7 @@ class AESCipher(object):
         raw = self._pad(raw)
         iv = Random.new().read(AES.block_size)
         # iv = bytes([235, 59, 203, 149, 32, 90, 98, 114, 16, 202, 210, 84, 77, 180, 162, 68])
-        print("IV: ", [i for i in iv])
+        # print("IV: ", [i for i in iv])
         cipher = AES.new(self.key, AES.MODE_CBC, iv, segment_size=128)
         return iv+cipher.encrypt(raw)
         # return base64.b64encode(iv + cipher.encrypt(raw))
@@ -51,6 +51,11 @@ def decrypt_aes(key, iv, ciphertext):
     return aes.decrypt(iv_ds)
 
 
+def encrypt_aes(key, message):
+    aes = AESCipher(key)
+    return aes.encrypt(message)
+
+
 def decrypt_rsa(key, ciphertext):
     from Crypto.Cipher import PKCS1_OAEP
     from Crypto.PublicKey import RSA
@@ -69,24 +74,24 @@ def encrypt_rsa(key, message):
 
 def sign_message(priKey, message):
     from Crypto.Signature import PKCS1_PSS
-    from Crypto.Hash import SHA
+    from Crypto.Hash import SHA256
     from Crypto.PublicKey import RSA
     from Crypto import Random
 
-    h = SHA.new(message)
-    signer = PKCS1_PSS.new(priKey)
+    h = SHA256.new(message)
+    signer = PKCS1_PSS.new(priKey, saltLen=20)
     signature = signer.sign(h)
     return signature
 
 
 def verify_rsa(pubKey, message, signature):
     from Crypto.Signature import PKCS1_PSS
-    from Crypto.Hash import SHA
+    from Crypto.Hash import SHA256
     from Crypto.PublicKey import RSA
     from Crypto import Random
 
-    h = SHA.new(message)
-    verifier = PKCS1_PSS.new(pubKey)
+    h = SHA256.new(message)
+    verifier = PKCS1_PSS.new(pubKey, saltLen=20)
     if verifier.verify(h, signature):
         return True
     else:

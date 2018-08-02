@@ -21,7 +21,6 @@ app = App(__name__, template_folder='./vietcombank_app/templates', static_folder
 app.config.from_object(settings)
 db = MongoEngine(app)
 
-toolbar = DebugToolbarExtension(app)
 app.auto_add_template_filters()
 
 admin = Admin(app, template_mode='bootstrap3')
@@ -29,8 +28,10 @@ admin.add_view(ModelView(Card, endpoint='Manage Card'))
 
 mail.init_app(app)
 
-from vietcombank_app.views import home
+from vietcombank_app.views import home, api
+
 app.register_blueprint(home.module)
+app.register_blueprint(api.module)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8003)

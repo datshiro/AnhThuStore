@@ -403,11 +403,47 @@ function initPurchase(order_info) {
                                                                         type: 'POST',
                                                                         success: function(response) {
                                                                             if (response.data.status == "NO") {
-                                                                                alert("Không thanh toán đươc, hãy kiểm tra lại thông tin!");
+                                                                                alert("Không thanh toán đươc, hãy kiểm tra lại thông tin!\n" + response.data.message);
                                                                                 return false;
                                                                             } else {
-                                                                                alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
-                                                                                //                    window.location.href = response.data.url;
+//                                                                                var authdata = response.data.authdata
+//                                                                                if (authdata != 'everything is good'){
+//                                                                                    alert('something went wrong while starting transaction');
+//                                                                                }
+                                                                                if (response.data.action == 'password'){
+                                                                                    var authdata_signature = base64StringToArrayBuffer(response.data.b64_authdata_signature);
+                                                                                    var authdata_encrypted = base64StringToArrayBuffer(response.data.b64_authdata_encrypted);
+                                                                                    var k5_b64_encrypted = base64StringToArrayBuffer(response.data.b64_k5_b64_encrypted);
+                                                                                    console.log('authdata_signature', authdata_signature);
+                                                                                    console.log('authdata_encrypted', authdata_encrypted);
+                                                                                    console.log('k5_b64_encrypted', k5_b64_encrypted);
+                                                                                    decryptK5_B64(k5_b64_encrypted, k1).
+                                                                                        then(function(k5){
+                                                                                            decrypt_aes_from_merchant(k5, authdata_encrypted).
+                                                                                                then(function(decrypted){
+                                                                                                    var authdata = decrypted;
+                                                                                                    // Verify Signature
+                                                                                                    verify_authdata(authdata, authdata_signature).
+                                                                                                        then(function(isvalid){
+                                                                                                            console.log("isvalid",isvalid);
+                                                                                                            if (isvalid){
+                                                                                                                authdata = new TextDecoder().decode(authdata);
+                                                                                                                if(authdata == 'everything is good'){
+                                                                                                                    $('#password-form').removeClass('hidden');
+                                                                                                                    alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
+                                                                                                                }else{
+                                                                                                                    alert("Failed Transaction! Please Try Again!");
+                                                                                                                }
+                                                                                                            }
+                                                                                                        })
+
+
+                                                                                                });
+                                                                                        }
+                                                                                    );
+//                                                                                    purchaseRequestDecrypt(authdata_encrypted, authdata_signature, k5_b64_encrypted)
+//                                                                                    window.location.href = response.data.url;
+                                                                                }
                                                                             }
                                                                         },
                                                                         error: function(error) {
@@ -581,6 +617,98 @@ function encryptKey1(k1){
     });
 }
 
+function decryptK5_B64(k5_b64_encrypted, k1){
+    return new Promise(
+        function(resolve){
+            k5_b64_encrypted = new Uint8Array(k5_b64_encrypted);
+            window.crypto.subtle.decrypt(
+            {
+                name: "AES-CBC",
+                iv: k5_b64_encrypted.slice(0,16), //The initialization vector you used to encrypt
+            },
+            k1,
+            k5_b64_encrypted.slice(16,))
+            .then(function(decrypted){
+                //returns an ArrayBuffer containing the decrypted data
+
+                // Decode Base64
+                var byteArray = new Uint8Array(decrypted);
+                var byteString = '';
+                for (var i=0; i<byteArray.byteLength; i++) {
+                    byteString += String.fromCharCode(byteArray[i]);
+                }
+                k5 = base64StringToArrayBuffer(byteString);
+                console.log("k5", k5);
+                resolve(k5);
+            })
+        }
+    );
+}
+
+function decrypt_aes_from_merchant(key, encrypted){
+    return new Promise(
+        function(resolve){
+            window.crypto.subtle.importKey(
+                "raw", //can be "jwk" or "raw"
+                key,
+                {   //this is the algorithm options
+                    name: "AES-CBC",
+                },
+                true, //whether the key is extractable (i.e. can be used in exportKey)
+                ["encrypt", "decrypt"] //can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
+            )
+            .then(function(key){
+                window.crypto.subtle.decrypt(
+                {
+                    name: "AES-CBC",
+                    iv: encrypted.slice(0,16), //The initialization vector you used to encrypt
+                },
+                key,
+                encrypted.slice(16,))
+                .then(function(decrypted){
+                    //returns an ArrayBuffer containing the decrypted data
+                    decrypted = new Uint8Array(decrypted);
+//                    console.log("decrypted", decrypted, arrayToHex(decrypted));
+//                    decrypted_string = new TextDecoder().decode(decrypted);
+                    resolve(decrypted);
+                })
+            })
+
+        }
+    );
+}
+
+function verify_authdata(authdata, authdata_signature){
+    return new Promise(
+        function(resolve){
+            crypto.subtle.importKey("spki", convertPemToBinary($('#kum').val()),
+            {   //these are the algorithm options
+                name: "RSA-PSS",
+                hash: {name: "SHA-256"}, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+            },
+            false,
+            ["verify"]).
+            then(function(key){
+                console.log("authdata", authdata);
+                console.log("authdata_signature", authdata_signature);
+
+                window.crypto.subtle.verify(
+                    {
+                        name: "RSA-PSS",
+                        saltLength: 20, //the length of the salt
+                    },
+                    key, //from generateKey or importKey above
+                    authdata_signature, //ArrayBuffer of the signature
+                    authdata //ArrayBuffer of the data
+                )
+                .then(function(isvalid){
+                    resolve(isvalid);
+                })
+            })
+
+        }
+    );
+}
 function arrayToB64(arr){
     return btoa(arr);
 }
