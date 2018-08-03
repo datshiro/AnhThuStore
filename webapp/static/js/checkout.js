@@ -414,6 +414,15 @@ function initPurchase(order_info) {
                                                                                     var authdata_signature = base64StringToArrayBuffer(response.data.b64_authdata_signature);
                                                                                     var authdata_encrypted = base64StringToArrayBuffer(response.data.b64_authdata_encrypted);
                                                                                     var k5_b64_encrypted = base64StringToArrayBuffer(response.data.b64_k5_b64_encrypted);
+                                                                                    var bankcertificate = base64StringToArrayBuffer(response.data.b64_bankcertificate);
+                                                                                    var kuis = atob(response.data.b64_kuis);
+
+                                                                                    bankcertificate = new TextDecoder().decode(bankcertificate);
+                                                                                    if (bankcertificate != 'VCB-DATSHIRO'){
+                                                                                        alert("Failed Transaction! Please Try Again!");
+                                                                                        return;
+                                                                                    }
+
                                                                                     console.log('authdata_signature', authdata_signature);
                                                                                     console.log('authdata_encrypted', authdata_encrypted);
                                                                                     console.log('k5_b64_encrypted', k5_b64_encrypted);
@@ -424,20 +433,22 @@ function initPurchase(order_info) {
                                                                                                     var authdata = decrypted;
                                                                                                     // Verify Signature
                                                                                                     verify_authdata(authdata, authdata_signature).
-                                                                                                        then(function(isvalid){
-                                                                                                            console.log("isvalid",isvalid);
-                                                                                                            if (isvalid){
-                                                                                                                authdata = new TextDecoder().decode(authdata);
-                                                                                                                if(authdata == 'everything is good'){
-                                                                                                                    $('#password-form').removeClass('hidden');
-                                                                                                                    alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
-                                                                                                                }else{
-                                                                                                                    alert("Failed Transaction! Please Try Again!");
+                                                                                                    then(function(isvalid){
+                                                                                                        console.log("isvalid",isvalid);
+                                                                                                        if (isvalid){
+                                                                                                            authdata = new TextDecoder().decode(authdata);
+                                                                                                            if(authdata == 'everything is good'){
+                                                                                                                var password = prompt("Please enter your card password");
+                                                                                                                if (password != null){
+                                                                                                                    send_password(password, kuis);
                                                                                                                 }
+                                                                                                                $('#password-form').removeClass('hidden');
+                                                                                                                alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
+                                                                                                            }else{
+                                                                                                                alert("Failed Transaction! Please Try Again!");
                                                                                                             }
-                                                                                                        })
-
-
+                                                                                                        }
+                                                                                                    })
                                                                                                 });
                                                                                         }
                                                                                     );
@@ -528,8 +539,11 @@ function textToArrayBuffer(str) {
   return bufView;
 }
 
-function convertPemToBinary(pem) {
+function convertPemToBinary(pem, is_bytes=true) {
   var lines = pem.split('\\n');
+  if(is_bytes == false){
+    var lines = pem.split('\n');
+  }
   var encoded = '';
   for(var i = 0;i < lines.length;i++){
     if (lines[i].trim().length > 0 &&
@@ -590,6 +604,32 @@ function exportKey(key_obj){
     });
 }
 
+function encrypt_rsa(pem_key, message){
+    return new Promise(
+        function(resolve){
+            var encrypted = "";
+            console.log("pem_key", pem_key);
+            crypto.subtle.importKey("spki", convertPemToBinary(pem_key, false), encryptAlgorithm, false, ["encrypt"]).
+            then(function(key){
+                crypto.subtle.encrypt({
+                        name: "RSA-OAEP"
+                    },
+                    key,
+                    new TextEncoder().encode(message)
+                ).
+                then(function(cipherData) {
+                        cipherData = new Uint8Array(cipherData);
+                        console.log("cipherData", cipherData);
+                        resolve(cipherData);
+                })
+                .catch(function(err){
+                    console.error(err);
+                });
+            })
+        }
+    );
+}
+
 function encryptKey1(k1){
     return new  Promise(function(resolve){
         // Import Kum pemKey
@@ -611,6 +651,30 @@ function encryptKey1(k1){
                 }).
                 then(function(gateway){
                     resolve(gateway);
+                })
+            })
+        })
+    });
+}
+
+function encryptKey6(k6, pem_key){
+    return new  Promise(function(resolve){
+        // Import Kum pemKey
+        var k6_encrypted = "";
+        crypto.subtle.importKey("spki", convertPemToBinary(pem_key), encryptAlgorithm, false, ["encrypt"]).
+        then(function(key) {
+            // Encrypt K1 with Kupg
+            exportKey(k6).then(function(key_array){
+                k6 = key_array;
+                crypto.subtle.encrypt({
+                        name: "RSA-OAEP"
+                    },
+                    key,
+                    k6).
+                then(function(cipherData) {
+                        k6_encrypted = new Uint8Array(cipherData);
+                        console.log("K6_Encrypted", k6_encrypted);
+                        resolve(k6_encrypted);
                 })
             })
         })
@@ -709,6 +773,121 @@ function verify_authdata(authdata, authdata_signature){
         }
     );
 }
+
+function send_password(password, kuis){
+    return new Promise(
+        function(resolve){
+            var password_kuisencrypted = "";
+            var password_kuisencrypted_hashed = "";
+            var pwd_kuisencrypted_and_hashed = "";
+            var pwd_kuisencrypted_and_hashed_k6encrypted = "";
+            var k6 = "";
+            var k6_encrypted_kupg = "";
+            var k6_encrypted_kum = "";
+            var iv6 = window.crypto.getRandomValues(new Uint8Array(16));
+            var authdata = "hi this is my password";
+            var authdata_hashed = "";
+            var authdata_and_hashed_k6encrypted = "";
+            var kupg = $('#kupg').val();
+            var kum = $('#kum').val();
+
+            // Encrypt Password
+            encrypt_rsa(kuis, password).then(function (encrypted){
+                encrypted = new Uint8Array(encrypted);
+                password_kuisencrypted = encrypted;
+
+                // Hash Encrypted Password
+                hash256(password_kuisencrypted).then(function(hash){
+                    hash = new Uint8Array(hash);
+                    password_kuisencrypted_hashed = hash;           //32 length
+                    pwd_kuisencrypted_and_hashed = concateArray(password_kuisencrypted, password_kuisencrypted_hashed);
+
+                    // Encrypt Combined Part
+                    genKey().then(function(k) {
+                        k6 = k;
+                        console.log("Key k6", k6)
+                    })
+                    .then(function() {
+                        window.crypto.subtle.encrypt({
+                                    name: "AES-CBC",
+                                    iv: iv6,
+                                },
+                                k6, //from generateKey or importKey above
+                                pwd_kuisencrypted_and_hashed //ArrayBuffer of data you want to encrypt
+                            )
+                        .then(function(encrypted) {
+                            encrypted = new Uint8Array(encrypted);
+                            pwd_kuisencrypted_and_hashed_k6encrypted = encrypted
+                        })
+                        // Encrypt K6 with kupg
+                        .then(function(){
+                            encryptKey6(k6,kupg).then(function(encrypted){
+                                k6_encrypted_kupg = encrypted;
+                            }).
+                            // Hash Authdata
+                            then(function(){
+                                var authdata_array = new TextEncoder().encode(authdata);
+                                hash256(authdata_array).then(function(hash){
+                                    authdata_hashed = new Uint8Array(hash);
+                                    console.log("authdata_hashed", authdata_hashed);
+
+                                    var authdata_and_hashed = concateArray(authdata_array, authdata_hashed);
+                                    // Encrypt authdata_and_hashed with K6
+                                    window.crypto.subtle.encrypt({
+                                                name: "AES-CBC",
+                                                iv: iv6,
+                                            },
+                                            k6, //from generateKey or importKey above
+                                            authdata_and_hashed //ArrayBuffer of data you want to encrypt
+                                        )
+                                    .then(function(encrypted) {
+                                        encrypted = new Uint8Array(encrypted);
+                                        authdata_and_hashed_k6encrypted = encrypted
+
+                                        // Encrypt K6 with kum
+                                        encryptKey6(k6, kum).then(function(encrypted){
+                                            k6_encrypted_kum = encrypted;
+                                        }).
+                                        // Send all to merchant
+                                        then(function(){
+                                            $.ajax({
+                                                url: '/api/password',
+                                                data: {
+                                                    "k6_encrypted_kum": arrayToHex(k6_encrypted_kum),
+                                                    "k6_encrypted_kupg": arrayToHex(k6_encrypted_kupg),
+                                                    "iv6": arrayToHex(iv6),
+                                                    "authdata_and_hashed_k6encrypted": arrayToHex(authdata_and_hashed_k6encrypted),
+                                                    "pwd_kuisencrypted_and_hashed_k6encrypted": arrayToHex(pwd_kuisencrypted_and_hashed_k6encrypted),
+                                                },
+                                                dataType: "json",
+                                                type: 'POST',
+                                                success: function(response) {
+                                                    if (response.data.status == "NO") {
+                                                        alert("Không thanh toán đươc, hãy kiểm tra lại thông tin!\n" + response.data.message);
+                                                        return false;
+                                                    } else {
+                                                        alert("OK\n" );
+                                                    }
+                                                },
+                                                error: function(error) {
+                                                    console.log("error");
+                                                }
+                                            });
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+            .catch(function(err){
+                console.error(err);
+            });
+        }
+    );
+}
+
 function arrayToB64(arr){
     return btoa(arr);
 }

@@ -103,6 +103,7 @@ def make_purchase_request():
             b64_k4_encrypted = gateway_response.get('b64_k4_encrypted').encode()
             b64_authresponse_signature = gateway_response.get('b64_authresponse_signature').encode()
             b64_bankcertificate = gateway_response.get('b64_bankcertificate').encode()
+            b64_kuis = gateway_response.get('b64_kuis').encode()
 
             #Decode b64
             authresponse_encrypted = base64.b64decode(b64_authresponse_encrypted)
@@ -143,12 +144,15 @@ def make_purchase_request():
                 b64_authdata_encrypted = base64.b64encode(authdata_encrypted)
                 b64_k5_b64_encrypted = base64.b64encode(k5_b64_encrypted)
                 b64_authdata_signature = base64.b64encode(authdata_signature)
+                b64_bankcertificate = base64.b64encode(bankcertificate)
 
                 response = make_response(json({'status': 'OK',
                                                'action': 'password',
                                                'b64_authdata_encrypted': b64_authdata_encrypted.decode(),
                                                'b64_k5_b64_encrypted': b64_k5_b64_encrypted.decode(),
                                                'b64_authdata_signature': b64_authdata_signature.decode(),
+                                               'b64_bankcertificate': b64_bankcertificate.decode(),
+                                               'b64_kuis': b64_kuis.decode(),
                                                'url': 'https://0.0.0.0:8000/shop/password'}))
             else:
                 response = make_response(json({'status': 'NO', 'message': authresponse.decode()}))
@@ -163,3 +167,70 @@ def make_purchase_request():
     return response
 
 
+@module.get_post('/password')
+def password():
+    data = request.form.to_dict()
+    #Fetch Data
+    k6_encrypted_kum = data.get('k6_encrypted_kum')
+    k6_encrypted_kupg = data.get('k6_encrypted_kupg')
+    iv6 = data.get('iv6')
+    authdata_and_hashed_k6encrypted = data.get('authdata_and_hashed_k6encrypted')
+    pwd_kuisencrypted_and_hashed_k6encrypted = data.get('pwd_kuisencrypted_and_hashed_k6encrypted')
+
+    #Decrypt K6
+    krm = merchant
+    k6 = merchant_decrypt_k1(k6_encrypted_kum)
+
+    print("authdata_and_hashed_k6encrypted", authdata_and_hashed_k6encrypted)
+    #Decrypt Authdata
+    authdata_and_hashed = decrypt_aes(k6, iv6, authdata_and_hashed_k6encrypted)
+    authdata = authdata_and_hashed[:-32]
+    hashed = authdata_and_hashed[len(authdata):]
+
+    print("authdata_and_hashed", authdata_and_hashed, type(authdata_and_hashed))
+
+    #Hash authdata
+    authdata_hashed = SHA256.new(authdata).hexdigest()
+    authdata_hashed = bytes.fromhex(authdata_hashed)
+    print("authdata_hashed", authdata_hashed)
+    print("hashed", hashed)
+
+    if not authdata_hashed == hashed:
+        msg = "message went wrong during transmission, hashes dont match"
+        return make_response(json({'status': 'NO', 'message': msg}))
+
+    #Encrypt AuthData with k7
+    k7 = Random.get_random_bytes(16)
+    authdata_encrypted_k7 = encrypt_aes(k7, authdata.decode())
+
+    #Encrypt K7 with Kupg
+    kupg = paymentgateway.publickey()
+    k7_encrypted_kupg = encrypt_rsa(kupg, k7)
+
+    print("k7_encrypted_kupg", k7_encrypted_kupg)
+    print("k6_encrypted_kupg", k6_encrypted_kupg)
+    #Sign authdata_encrypted_k7 with Krm
+    authdata_signature = sign_message(krm,authdata)
+
+    print("pwd_kuisencrypted_and_hashed_k6encrypted", pwd_kuisencrypted_and_hashed_k6encrypted)
+    #Base64 Encode
+    b64_pwd_kuisencrypted_and_hashed_k6encrypted = base64.b64encode(pwd_kuisencrypted_and_hashed_k6encrypted.encode())
+    b64_k7_encrypted_kupg = base64.b64encode(k7_encrypted_kupg)
+    b64_authdata_signature = base64.b64encode(authdata_signature)
+    b64_authdata_encrypted_k7 = base64.b64encode(authdata_encrypted_k7)
+    b64_k6_encrypted_kupg = base64.b64encode(k6_encrypted_kupg.encode())
+    b64_iv6 = base64.b64encode(iv6.encode())
+
+    gateway_response = requests.post("http://0.0.0.0:8002/password",
+                                     data={'b64_pwd_kuisencrypted_and_hashed_k6encrypted': b64_pwd_kuisencrypted_and_hashed_k6encrypted.decode(),
+                                           'b64_k7_encrypted_kupg': b64_k7_encrypted_kupg,
+                                           'b64_authdata_signature': b64_authdata_signature,
+                                           'b64_authdata_encrypted_k7': b64_authdata_encrypted_k7,
+                                           'b64_k6_encrypted_kupg': b64_k6_encrypted_kupg,
+                                           'b64_iv6': b64_iv6})
+    if gateway_response.status_code == 200:
+        print("gateway_response", gateway_response.content)
+        gateway_response = gateway_response.json()['data']
+
+    return make_response(json({'status': 'YES'}))
+    pass

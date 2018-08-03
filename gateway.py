@@ -82,6 +82,7 @@ def test():
 
 				authresponse = bank_response.get('authresponse')
 				bankcertificate = bank_response.get('bankcertificate')
+				b64_kuis = bank_response.get('b64_kuis')
 
 				#Encrypt authresponse
 				k4 = Random.get_random_bytes(16)
@@ -111,7 +112,8 @@ def test():
 				return make_response(json({'b64_authresponse_signature': b64_authresponse_signature.decode(),
 										   'b64_k4_encrypted': b64_k4_encrypted.decode(),
 										   'b64_authresponse_encrypted': b64_authresponse_encrypted.decode(),
-										   'b64_bankcertificate': b64_bankcertificate.decode()}))
+										   'b64_bankcertificate': b64_bankcertificate.decode(),
+										   'b64_kuis': b64_kuis}))
 		else:
 			msg = 'message went wrong during transmission, hashes dont match'
 			return make_response(json({'message': msg}))
@@ -119,6 +121,76 @@ def test():
 		msg = 'Authdata went wrong during transmission, failed to verify signature'
 		return make_response(json(msg))
 	return "OK"
+
+
+@app.route("/password", methods=["POST"])
+def password():
+	data = request.form.to_dict()
+
+	# Fetch data
+	b64_pwd_kuisencrypted_and_hashed_k6encrypted = data.get('b64_pwd_kuisencrypted_and_hashed_k6encrypted')
+	b64_k7_encrypted_kupg = data.get('b64_k7_encrypted_kupg')
+	b64_authdata_signature = data.get('b64_authdata_signature')
+	b64_authdata_encrypted_k7 = data.get('b64_authdata_encrypted_k7')
+	b64_k6_encrypted_kupg = data.get('b64_k6_encrypted_kupg')
+	b64_iv6 = data.get('b64_iv6')
+
+	#Decode Base64
+	pwd_kuisencrypted_and_hashed_k6encrypted = base64.b64decode(b64_pwd_kuisencrypted_and_hashed_k6encrypted)
+	k7_encrypted_kupg = base64.b64decode(b64_k7_encrypted_kupg)
+	authdata_signature = base64.b64decode(b64_authdata_signature)
+	authdata_encrypted_k7 = base64.b64decode(b64_authdata_encrypted_k7)
+	k6_encrypted_kupg = base64.b64decode(b64_k6_encrypted_kupg)
+	iv6 = base64.b64decode(b64_iv6)
+
+	#Decrypt K7
+	krpg = paymentgateway
+	print("k7_encrypted_kupg", k7_encrypted_kupg)
+	k7 = decrypt_rsa(krpg,k7_encrypted_kupg)
+
+	#Decrypt AuthData
+	authdata = AESCipher(k7).decrypt(authdata_encrypted_k7)
+
+	# verify authdata_signature
+	kum = merchant.publickey()
+	if not verify_rsa(kum, authdata, authdata_signature):
+		msg = 'message went wrong during transmission, hashes dont match'
+		return make_response(json({'message': msg}))
+
+	#Decrypt K6 with Krpg
+	print("k6_encrypted_kupg", k6_encrypted_kupg)
+
+	from Crypto.Cipher import PKCS1_OAEP
+	k6 = PKCS1_OAEP.new(krpg).decrypt(bytes.fromhex(k6_encrypted_kupg.decode()))
+
+	print("pwd_kuisencrypted_and_hashed_k6encrypted", pwd_kuisencrypted_and_hashed_k6encrypted)
+	#Decrypt pwd_kuisencrypted_and_hashed_k6encrypted
+	pwd_kuisencrypted_and_hashed = decrypt_aes(k6,iv6.decode(), pwd_kuisencrypted_and_hashed_k6encrypted.decode())
+	pwd_kuisencrypted = pwd_kuisencrypted_and_hashed[:-32]
+	hashed = pwd_kuisencrypted_and_hashed[len(pwd_kuisencrypted):]
+
+	#Hash pwd_kuisencrypted
+	pwd_kuisencrypted_hashed = SHA256.new(pwd_kuisencrypted).hexdigest()
+	pwd_kuisencrypted_hashed = bytes.fromhex(pwd_kuisencrypted_hashed)
+	if not pwd_kuisencrypted_hashed == hashed:
+		msg = 'message went wrong during transmission, hashes dont match'
+		return make_response(json({'message': msg}))
+
+	print("authdata", authdata)
+
+	#Base64 Encode
+	b64_authdata = base64.b64encode(authdata)
+	b64_pwd_kuisencrypted = base64.b64encode(pwd_kuisencrypted)
+
+	bank_response = requests.post("http://0.0.0.0:8003/api/password",
+								  data={'b64_authdata': b64_authdata,
+										'b64_pwd_kuisencrypted': b64_pwd_kuisencrypted})
+	if not bank_response.status_code == 200:
+		msg = "Can't communicate with issue banker"
+		return make_response(json({'message': msg}))
+	print("bank_response.content", bank_response.content)
+	msg = "OK"
+	return make_response(json({'message': msg}))
 
 @app.route("/start", methods=["POST"])
 def start():
@@ -142,7 +214,7 @@ def start():
 	pomd2 = aes.decrypt(pi[-256:-128])
 	payment_information = pi[:-256]
 
-	if SHA512.new(oimd  +SHA512(payment_information)).hexdigest() != pomd2:
+	if SHA512.new(oimd+SHA512(payment_information)).hexdigest() != pomd2:
 		return 'hashes dont match, dual signature corrupted'
 
 	aes = AES.new(k3, AES.MODE_CFB, iv5)
@@ -175,8 +247,8 @@ def start():
 
 	return data
 
-@app.route("/password", methods=["POST"])
-def password():
+@app.route("/password1", methods=["POST"])
+def password1():
 	if not request.json:
 		abort(400)
 
@@ -268,6 +340,7 @@ def otp():
 	k1 = paymentgateway.encrypt(k1)
 
 	return {'authdata': authdata, 'kx': k1, 'iv': i1, 'signature': signature}
+
 
 if __name__ == "__main__":
 	app.run(host="0.0.0.0", debug=True, port=8002)
