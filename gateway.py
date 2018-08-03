@@ -16,6 +16,7 @@ from services.converter import bytes_to_array, json
 from services.keys import *
 from Crypto import Random
 
+from settings import SESSION_KEY
 
 app = Flask(__name__)
 
@@ -23,9 +24,11 @@ app = Flask(__name__)
 def test():
 	# if not request.json:
 	# 	abort(400)
+	data = request.form.to_dict()
+	session_id = data.get('session_id')
+	print("session_id", session_id)
 
 	#Fetch data
-	data = request.form.to_dict()
 	b64_authdata_encrypted = data.get('b64_authdata_encrypted', '')
 	b64_k3_encrypted = data.get('b64_k3_encrypted')
 	b64_authdata_signature = data.get('b64_authdata_signature')
@@ -75,7 +78,8 @@ def test():
 		print("k1", k1, bytes_to_array(k1))
 
 		if ds_check(oimd, pi, ds, k1, iv1, merchant=False):
-			response = requests.post("http://0.0.0.0:8003/api/authorization", data={'authdata': authdata,'pi': pi})
+			response = requests.post("http://0.0.0.0:8003/api/authorization", data={'authdata': authdata,'pi': pi, 'session_id': session_id})
+
 			if response.status_code == 200:
 				print("bank_response", response.json())
 				bank_response = response.json()['data']
@@ -104,10 +108,6 @@ def test():
 				b64_k4_encrypted = base64.b64encode(k4_encrypted)
 				b64_authresponse_signature = base64.b64encode(authresponse_signature)
 				b64_bankcertificate = base64.b64encode(bankcertificate.encode())
-				print("b64_authresponse_encrypted", b64_authresponse_encrypted)
-				print("b64_k4_encrypted", b64_k4_encrypted)
-				print("b64_authresponse_signature", b64_authresponse_signature)
-				print("b64_bankcertificate", b64_bankcertificate)
 
 				return make_response(json({'b64_authresponse_signature': b64_authresponse_signature.decode(),
 										   'b64_k4_encrypted': b64_k4_encrypted.decode(),
@@ -127,6 +127,8 @@ def test():
 def password():
 	data = request.form.to_dict()
 
+	session_id = data.get('session_id')
+	print("session_id", session_id)
 	# Fetch data
 	b64_pwd_kuisencrypted_and_hashed_k6encrypted = data.get('b64_pwd_kuisencrypted_and_hashed_k6encrypted')
 	b64_k7_encrypted_kupg = data.get('b64_k7_encrypted_kupg')
@@ -184,13 +186,34 @@ def password():
 
 	bank_response = requests.post("http://0.0.0.0:8003/api/password",
 								  data={'b64_authdata': b64_authdata,
-										'b64_pwd_kuisencrypted': b64_pwd_kuisencrypted})
+										'b64_pwd_kuisencrypted': b64_pwd_kuisencrypted,
+										'session_id': session_id})
 	if not bank_response.status_code == 200:
 		msg = "Can't communicate with issue banker"
 		return make_response(json({'message': msg}))
+
 	print("bank_response.content", bank_response.content)
-	msg = "OK"
-	return make_response(json({'message': msg}))
+	payment_response = bank_response.json()['data'].get('payment_response')
+
+	# Encrypt payment_response
+	k8 = Random.get_random_bytes(16)
+	payment_response_encrypted = encrypt_aes(k8, payment_response)
+
+	#Encrypt K8 with Kum
+	k8_encrypted_kum = encrypt_rsa(kum, k8)
+
+	#Sign payment_response
+	payment_response_signature = sign_message(krpg, payment_response.encode())
+
+	#Base64 Encode
+	b64_payment_response_encrypted = base64.b64encode(payment_response_encrypted)
+	b64_k8_encrypted_kum = base64.b64encode(k8_encrypted_kum)
+	b64_payment_response_signature = base64.b64encode(payment_response_signature)
+
+	return make_response(json({'status': 'YES',
+							   'b64_payment_response_encrypted': b64_payment_response_encrypted.decode(),
+							   'b64_k8_encrypted_kum': b64_k8_encrypted_kum.decode(),
+							   'b64_payment_response_signature': b64_payment_response_signature.decode()}))
 
 @app.route("/start", methods=["POST"])
 def start():

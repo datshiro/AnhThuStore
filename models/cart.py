@@ -44,7 +44,7 @@ class Cart(object):
         for k,v in products.items():
             product = Product.objects.get(pk=k)
             sum += (product.price * v)
-            product.quantity -= v               # FIX LATER
+            # product.quantity -= v               # FIX LATER
             product.save()
         return sum
 

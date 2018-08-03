@@ -14,6 +14,7 @@ from services.converter import bytes_to_array, hex_to_bytes, hex_to_array, json
 import json as JSON
 
 from services.keys import paymentgateway, merchant
+from settings import SESSION_KEY
 
 module = Module('api', __name__, url_prefix='/api')
 
@@ -22,7 +23,8 @@ module = Module('api', __name__, url_prefix='/api')
 def make_purchase_request():
     data = request.form.to_dict()
     print(data)
-
+    session_id = request.cookies.get(SESSION_KEY)
+    print("session_id", session_id)
     pomd = data.get('pomd')
     pimd = data.get('pimd')
     oimd = data.get('oimd')
@@ -88,7 +90,8 @@ def make_purchase_request():
                                             'k2_encrypted': k2_encrypted,
                                             'iv2': iv2,
                                             'iv1': iv1,
-                                            'b64_k1_encrypted':b64_k1_encrypted})
+                                            'b64_k1_encrypted':b64_k1_encrypted,
+                                            'session_id': request.cookies.get(SESSION_KEY)})
 
         if gateway_response.status_code == 200:
             print("gateway_response", gateway_response.content)
@@ -159,9 +162,11 @@ def make_purchase_request():
             return response
 
         msg = "can't communicate with gateway"
+        print("msg", msg)
         response = make_response(json({'status': 'NO', 'message': msg}))
     else:
         msg = 'message went wrong during transmission, hashes dont match'
+        print("msg", msg)
         response = make_response(json({'status': 'NO', 'message': msg}))
 
     return response
@@ -227,10 +232,38 @@ def password():
                                            'b64_authdata_signature': b64_authdata_signature,
                                            'b64_authdata_encrypted_k7': b64_authdata_encrypted_k7,
                                            'b64_k6_encrypted_kupg': b64_k6_encrypted_kupg,
-                                           'b64_iv6': b64_iv6})
+                                           'b64_iv6': b64_iv6,
+                                           'session_id': request.cookies.get(SESSION_KEY)})
+
     if gateway_response.status_code == 200:
         print("gateway_response", gateway_response.content)
         gateway_response = gateway_response.json()['data']
 
-    return make_response(json({'status': 'YES'}))
+        if gateway_response.get('status') == 'YES':
+
+            #Fetch Data
+            b64_payment_response_encrypted = gateway_response.get('b64_payment_response_encrypted')
+            b64_k8_encrypted_kum = gateway_response.get('b64_k8_encrypted_kum')
+            b64_payment_response_signature = gateway_response.get('b64_payment_response_signature')
+
+            #Decode base64
+            payment_response_encrypted = base64.b64decode(b64_payment_response_encrypted)
+            k8_encrypted_kum = base64.b64decode(b64_k8_encrypted_kum)
+            payment_response_signature = base64.b64decode(b64_payment_response_signature)
+
+            #Decrypt K8_KUM
+            k8 = decrypt_rsa(krm, k8_encrypted_kum)
+
+            #Decrypt payment_response_encrypted
+            payment_response = AESCipher(k8).decrypt(payment_response_encrypted)
+
+            if verify_rsa(kupg, payment_response, payment_response_signature):
+                if (payment_response.decode() == 'the otp matches'):
+                    return make_response(json({'status': 'YES', 'payment_response': payment_response.decode()}))
+                else:
+                    msg = "the otp does not matches"
+                    return make_response(json({'status': 'NO', 'message': msg}))
+
+    msg="No response from gateway"
+    return make_response(json({'status': 'NO', 'message': msg}))
     pass

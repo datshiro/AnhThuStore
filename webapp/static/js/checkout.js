@@ -209,7 +209,7 @@ function makePurchaseRequest(oi){
                     return false;
                 } else {
                     alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
-//                    window.location.href = response.data.url;
+//                    window.location.href = response.data.url;hang
 //                    finished();
                 }
             },
@@ -442,8 +442,6 @@ function initPurchase(order_info) {
                                                                                                                 if (password != null){
                                                                                                                     send_password(password, kuis);
                                                                                                                 }
-                                                                                                                $('#password-form').removeClass('hidden');
-                                                                                                                alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
                                                                                                             }else{
                                                                                                                 alert("Failed Transaction! Please Try Again!");
                                                                                                             }
@@ -866,7 +864,8 @@ function send_password(password, kuis){
                                                         alert("Không thanh toán đươc, hãy kiểm tra lại thông tin!\n" + response.data.message);
                                                         return false;
                                                     } else {
-                                                        alert("OK\n" );
+                                                        alert(response.data.payment_response);
+                                                        alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
                                                     }
                                                 },
                                                 error: function(error) {
