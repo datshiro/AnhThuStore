@@ -10,7 +10,12 @@ $('#view-work').on('click', function(){
 
 // GO TO TOP BUTTON SHOW
 // When the user scrolls down 20px from the top of the document, show the button
-window.onscroll = function() {scrollFunction()};
+window.onscroll = function() {
+    scrollFunction();
+    $('#flash-messages').mouseover(function(){
+        $('flash-messages').animate({height: '0px'})
+    });
+};
 
 function scrollFunction(){
 //	const images = $('#images').position().top;
@@ -28,3 +33,5 @@ function goToTop(){
         scrollTop: 0
     },700);
 }
+
+

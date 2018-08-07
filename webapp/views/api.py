@@ -5,9 +5,13 @@ import requests
 from Crypto import Random
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
-from flask import request, make_response, Response
+from flask import request, make_response, Response, render_template
 from Crypto.Hash import SHA512, SHA256
+from flask_mail import Message
+
 from core.module import Module
+from models.cart import Cart
+from models.product import Product
 from services.Cipher import AESCipher, merchant_decrypt_k1, decrypt_aes, ds_check, encrypt_rsa, sign_message, \
     decrypt_rsa, verify_rsa, encrypt_aes
 from services.converter import bytes_to_array, hex_to_bytes, hex_to_array, json
@@ -157,6 +161,10 @@ def make_purchase_request():
                                                'b64_bankcertificate': b64_bankcertificate.decode(),
                                                'b64_kuis': b64_kuis.decode(),
                                                'url': 'https://0.0.0.0:8000/shop/password'}))
+                session = request.session
+                # print("oi", JSON.loads(oi))
+                session.data = JSON.loads(oi)
+                session.save()
             else:
                 response = make_response(json({'status': 'NO', 'message': authresponse.decode()}))
             return response
@@ -259,7 +267,22 @@ def password():
 
             if verify_rsa(kupg, payment_response, payment_response_signature):
                 if (payment_response.decode() == 'the otp matches'):
-                    return make_response(json({'status': 'YES', 'payment_response': payment_response.decode()}))
+                    cart = Cart.get_current()
+                    products = cart.products
+                    msg = render_template('mail_order.html', products=products, cart=cart)
+                    user = request.session.user
+                    from app import mail
+
+                    message = Message(subject="Mua Hàng Thành Công",
+                                      html=msg,
+                                      sender=("Anh Thu Shop", "datshiro@gmail.com"),
+                                      recipients=[user.email])
+                    mail.send(message)
+                    cart = Cart.get_current()
+                    cart.data = {}
+                    response = make_response(json({'status': 'YES', 'payment_response': payment_response.decode()}))
+                    response.set_cookie('cart', cart.jsonified_data)
+                    return response
                 else:
                     msg = "the otp does not matches"
                     return make_response(json({'status': 'NO', 'message': msg}))
@@ -267,3 +290,9 @@ def password():
     msg="No response from gateway"
     return make_response(json({'status': 'NO', 'message': msg}))
     pass
+
+@module.get('/test-mail')
+def test_mail():
+    cart = Cart.get_current()
+    products = cart.products
+    return render_template('mail_order.html', products=products, cart=cart)

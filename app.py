@@ -2,6 +2,7 @@
 import sys
 
 from flask_admin.contrib.mongoengine import ModelView
+from flask_mail import Mail
 from flask_mongoengine import MongoEngine
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -16,10 +17,12 @@ from models.user import User
 from models.user_group import UserGroup
 
 reload(sys)
+mail = Mail()
 
 app = App(__name__, template_folder='./webapp/templates', static_folder='./webapp/static')
 app.config.from_object(settings)
 db = MongoEngine(app)
+mail.init_app(app)
 
 toolbar = DebugToolbarExtension(app)
 

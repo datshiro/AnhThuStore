@@ -9,11 +9,9 @@
             <thead  class="full-width">
                 <th class="">STT</th>
                 <th> Product Name</th>
-                <th> Product Name</th>
                 <th> Description </th>
                 <th> Quantity </th>
                 <th> Sub Total </th>
-                <th></th>
             </thead>
             {% for product in products %}
             <tr>
@@ -32,9 +30,7 @@
                 <td style="text-align: right;">
                     {{ (product.price * cart.products_data[product.id] ) | price}} đ
                 </td>
-                <td class="center aligned">
-                    <i class="icon remove red" id="{{ product.id }}" onclick="removeFromCart(event)"></i>
-                </td>
+
             </tr>
 
             {% endfor %}
@@ -45,12 +41,8 @@
                     </div>
                 </th>
                 <th style="text-align: right;"> <b> {{ cart.sum_value | price }}  đ </b></th>
-                <th></th>
             </tfoot>
         </table>
-        <div class="checkout-btn" style="text-align: right;">
-            <a href="{{ url_for('shop.checkout') }}" class="ui button primary" id="checkout-btn">Check Out</a>
-        </div>
     </form>
 {% endblock %}
 

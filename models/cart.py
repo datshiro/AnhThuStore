@@ -58,3 +58,7 @@ class Cart(object):
             except DoesNotExist:
                 pass
         return products
+
+    @classmethod
+    def empty(self):
+        self.data = {}
