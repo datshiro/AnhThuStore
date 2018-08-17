@@ -866,6 +866,8 @@ function send_password(password, kuis){
                                                     } else {
                                                         alert(response.data.payment_response);
                                                         alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
+                                                        console.log("url", response.data.url);
+                                                        window.location.href = response.data.url;
                                                     }
                                                 },
                                                 error: function(error) {

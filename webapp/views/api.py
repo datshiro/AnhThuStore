@@ -5,7 +5,7 @@ import requests
 from Crypto import Random
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
-from flask import request, make_response, Response, render_template
+from flask import request, make_response, Response, render_template, url_for
 from Crypto.Hash import SHA512, SHA256
 from flask_mail import Message
 
@@ -280,7 +280,7 @@ def password():
                     mail.send(message)
                     cart = Cart.get_current()
                     cart.data = {}
-                    response = make_response(json({'status': 'YES', 'payment_response': payment_response.decode()}))
+                    response = make_response(json({'status': 'YES', 'payment_response': payment_response.decode(), 'url': url_for('home.index')}))
                     response.set_cookie('cart', cart.jsonified_data)
                     return response
                 else:
