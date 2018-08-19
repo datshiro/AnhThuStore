@@ -18,6 +18,7 @@ from models.user_group import UserGroup
 
 reload(sys)
 mail = Mail()
+sdkfjsdkfsafalkf:wq
 
 app = App(__name__, template_folder='./webapp/templates', static_folder='./webapp/static')
 app.config.from_object(settings)
