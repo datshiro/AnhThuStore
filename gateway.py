@@ -2,7 +2,7 @@ import base64
 
 from flask import request, url_for, make_response, Response
 from flask import Flask, url_for
-from flask_api import FlaskAPI, status, exceptions
+#from flask_api import FlaskAPI, status, exceptions
 from flask import abort
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA512, SHA256

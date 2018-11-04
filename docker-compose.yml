@@ -6,8 +6,22 @@ services:
           command: python -u app.py
           ports:
                   - "8000:8000"
-                  - "8003:8003"
+          volumes:
+                  - .:/source 
+
+        gateway_dev:
+          build: .
+          command: python -u gateway.py
+          ports:
                   - "8002:8002" 
+          volumes:
+                  - .:/source 
+
+        bank_dev:
+          build: .
+          command: python -u vietcombank.py
+          ports:
+                  - "8003:8003"
           volumes:
                   - .:/source 
 
