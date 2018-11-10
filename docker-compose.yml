@@ -1,45 +1,23 @@
 version: '3.5'
 
-services: 
-        web_dev:
-          build: .
-          command: python -u app.py
-          ports:
-                  - "8000:8000"
-          volumes:
-                  - .:/source 
+services:
+  mongodb:
+    build: .
+    ports:
+    - "27017:27017"
+    volumes:
+    - .:/source
+    command: mongod
 
-        gateway_dev:
-          build: .
-          command: python -u gateway.py
-          ports:
-                  - "8002:8002" 
-          volumes:
-                  - .:/source 
-
-        bank_dev:
-          build: .
-          command: python -u vietcombank.py
-          ports:
-                  - "8003:8003"
-          volumes:
-                  - .:/source 
-
-        mongodb:
-                image: mongo:latest
-                ports:
-                        - 27017:27017
-                volumes:
-                  - .:/source 
-
-        mongoseed:
-                image: mongo:latest
-                links: 
-                  - mongodb 
-                volumes:
-                  - .:/source 
-                entrypoint: ["mongorestore","--port=27017", "--gzip", "--db", "anhthudb", "/source/dump/anhthudb"]
+  mongoseed:
+    image: mongo:4.0.4
+    links:
+    - mongodb
+    volumes:
+    - .:/source
+    command: 
+      "mongorestore --host mongodb --port 27017 --db anhthudb --gzip /source/dump/anhthudb"
 
 networks:
-        default:
-                name: web_dev
+    default:
+        name: mongo
