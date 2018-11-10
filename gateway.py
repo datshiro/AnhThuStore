@@ -21,6 +21,7 @@ from settings import SESSION_KEY
 app = Flask(__name__)
 
 @app.route("/test", methods=["POST", "GET"])
+#TODO: CHANGE METHOD NAME OF THIS FILE (WHERE TO CALL /Users/emilioanh/study/AnhThuStore/webapp/views/api.py)
 def test():
 	# if not request.json:
 	# 	abort(400)
@@ -78,6 +79,7 @@ def test():
 		print("k1", k1, bytes_to_array(k1))
 
 		if ds_check(oimd, pi, ds, k1, iv1, merchant=False):
+			#TODO: check pi key "bank_name" to switch for address not http://0.0.0.0:8003/api/authorization
 			response = requests.post("http://0.0.0.0:8003/api/authorization", data={'authdata': authdata,'pi': pi, 'session_id': session_id})
 
 			if response.status_code == 200:
