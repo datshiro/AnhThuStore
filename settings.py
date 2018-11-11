@@ -2,7 +2,7 @@ SECRET_KEY = 'Dat Shiro'
 DEBUG = True
 
 MONGODB_DB = 'anhthudb'
-MONGODB_HOST = 'mongodb'
+MONGODB_HOST = '127.0.0.1'
 DEFAULT_CONNECTION_NAME = 'anhthudb'
 
 SESSION_KEY = 'sessionId'

@@ -12,6 +12,7 @@ from importlib import reload
 import settings
 from flask_admin import Admin
 
+from models.card import Card
 from models.product import Product
 from models.user import User
 from models.user_group import UserGroup
@@ -30,6 +31,7 @@ admin = Admin(app, template_mode='bootstrap3')
 admin.add_view(ModelView(User, endpoint='Manage User'))
 admin.add_view(ModelView(Product,endpoint='Manage Product'))
 admin.add_view(ModelView(UserGroup, endpoint='User Group'))
+admin.add_view(ModelView(Card, endpoint='Cards'))
 
 app.auto_register_blueprint()
 
