@@ -49,9 +49,7 @@ class User(Document):
 
     @staticmethod
     def encrypt_password(password):
-        if len(password) > 7:
-            return md5(password.encode('utf-8')).hexdigest()
-        raise ValidationError('Password\'s length should >= 8')
+        return md5(password.encode('utf-8')).hexdigest()
 
     @classmethod
     def authenticate(cls, username, password):
