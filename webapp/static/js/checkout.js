@@ -367,7 +367,7 @@ async function initPurchase(order_info) {
             },
             dataType: "json",
             type: 'POST',
-            success: function (response) {
+            success: (response) => {
                 if (response.data.status == "NO") {
                     alert("Không thanh toán đươc, hãy kiểm tra lại thông tin!\n" + response.data.message);
                     return false;
@@ -392,28 +392,34 @@ async function initPurchase(order_info) {
                         console.log('authdata_signature', authdata_signature);
                         console.log('authdata_encrypted', authdata_encrypted);
                         console.log('k5_b64_encrypted', k5_b64_encrypted);
-                        k5 = await decryptK5_B64(k5_b64_encrypted, k1);
-                        let decrypted_authdata = await decrypt_aes_from_merchant(k5, authdata_encrypted);
-
-                        // Verify Signature
-                        let isvalid = await verify_authdata(decrypted_authdata, authdata_signature);
-                        console.log("isvalid", isvalid);
-                        if (isvalid) {
-                            decrypted_authdata = new TextDecoder().decode(decrypted_authdata);
-                            if (decrypted_authdata == 'everything is good') {
-                                var password = prompt("Please enter your card password");
-                                if (password != null) {
-                                    send_password(password, kuis);
-                                }
-                            } else {
-                                alert("Failed Transaction! Please Try Again!");
+                        decryptK5_B64(k5_b64_encrypted, k1).
+                            then((k5) => {
+                                decrypt_aes_from_merchant(k5, authdata_encrypted).
+                                    then((decrypted_authdata) => {
+                                        var authdata = decrypted_authdata;
+                                        // Verify Signature
+                                        verify_authdata(authdata, authdata_signature).
+                                            then((isvalid) => {
+                                                console.log("isvalid",isvalid);
+                                                if (isvalid){
+                                                    authdata = new TextDecoder().decode(authdata);
+                                                    if(authdata == 'everything is good'){
+                                                        var password = prompt("Please enter your card password");
+                                                        if (password != null){
+                                                            send_password(password, kuis);
+                                                        }
+                                                    }else{
+                                                        alert("Failed Transaction! Please Try Again!");
+                                                    }
+                                                }
+                                        });
+                                    });
                             }
-                        }
-
+                        );
                     }
                 }
             },
-            error: function (error) {
+            error: (error) => {
                 console.log("error");
             }
         });
