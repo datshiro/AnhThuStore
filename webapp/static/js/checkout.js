@@ -291,7 +291,7 @@ async function initPurchase(order_info) {
         iv1 = window.crypto.getRandomValues(new Uint8Array(16));
         k1 = await genKey();
         console.log("Key DS", k1);
-        let encrypted_pomd = window.crypto.subtle.encrypt({
+        let encrypted_pomd = await window.crypto.subtle.encrypt({
             name: "AES-CBC",
             iv: iv1,
         },
