@@ -8,7 +8,7 @@ from common.messages import Messages, ErrorMessages
 from core.module import Module
 from models.bank_session import BankSession
 from models.card import Card, DoesNotExist
-from services.Cipher import decrypt_rsa
+from services.cipher import decrypt_rsa
 from services.converter import json as custom_json
 from services.keys import bank
 
