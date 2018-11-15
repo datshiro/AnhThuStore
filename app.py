@@ -6,6 +6,7 @@ from flask_mail import Mail
 from flask_mongoengine import MongoEngine
 from flask_debugtoolbar import DebugToolbarExtension
 
+from common.constants import Ports
 from core.app import App
 from core.hooks import create_or_update_session, set_session_cookie
 from importlib import reload
@@ -41,4 +42,4 @@ app.after_request(set_session_cookie)
 app.auto_add_template_filters()
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8000, ssl_context=('cert.pem', 'key.pem'))
+    app.run(host="0.0.0.0", port=Ports.MERCHANT, ssl_context=('cert.pem', 'key.pem'))

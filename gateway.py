@@ -7,7 +7,7 @@ from Crypto.Hash import SHA512, SHA256
 import requests
 import json as JSON
 
-from common.constants import Api
+from common.constants import Api, Ports
 from common.messages import ErrorMessages
 from services.cipher import AESCipher, decrypt_aes, decrypt_rsa, verify_rsa, ds_check, encrypt_aes, encrypt_rsa, sign_message
 from services.converter import json
@@ -204,4 +204,4 @@ def password():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=8002)
+    app.run(host="0.0.0.0", debug=True, port=Ports.GATEWAY)

@@ -7,6 +7,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_mongoengine import MongoEngine
 from flask_mail import Mail
 
+from common.constants import Ports
 from core.app import App
 from importlib import reload
 
@@ -34,4 +35,4 @@ app.register_blueprint(home.module)
 app.register_blueprint(api.module)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8003)
+    app.run(host="0.0.0.0", port=Ports.VCB_BANK)
