@@ -269,7 +269,6 @@ async function initPurchase(order_info) {
     var dual_signature = "";
     var k2 = "";
     var k2_encrypted = "";
-    var merchant_part_encrypted = "";
     var gateway_part_encrypted = "";
     var iv1 = "";
     var iv2 = "";
@@ -372,10 +371,6 @@ async function initPurchase(order_info) {
                     alert("Không thanh toán đươc, hãy kiểm tra lại thông tin!\n" + response.data.message);
                     return false;
                 } else {
-                    // var authdata = response.data.authdata
-                    // if (authdata != 'everything is good') {
-                    //     alert('something went wrong while starting transaction');
-                    // }
                     if (response.data.action == 'password') {
                         var authdata_signature = base64StringToArrayBuffer(response.data.b64_authdata_signature);
                         var authdata_encrypted = base64StringToArrayBuffer(response.data.b64_authdata_encrypted);
@@ -420,7 +415,7 @@ async function initPurchase(order_info) {
                 }
             },
             error: (error) => {
-                console.log("error");
+                console.log("error:", error);
             }
         });
     } catch (error) {
@@ -821,49 +816,3 @@ function arrayToB64(arr) {
 function b64ToArray(b64str) {
     return atob(b64str);
 }
-
-//function merchantPart(merchant_part, k1, iv){
-//    return new Promise(function(resolve){
-//         var gateway_part_encrypted = "";
-//         var k1_encrypted = "";
-//
-//        // Encrypt gateway_part with k1
-//        window.crypto.subtle.encrypt({
-//                name: "AES-CBC",
-//                iv: iv,
-//            },
-//            k1, //from generateKey or importKey above
-//            encode_info(merchant_part) //ArrayBuffer of data you want to encrypt
-//        )
-//        .then(function(encrypted) {
-//            // Export K2
-//            exportKey(k1).then(function(key_array){
-//                k1 = key_array;
-//            })
-//            merchant_part_encrypted = new Uint8Array(encrypted);
-//            // Import Kum pemKey
-//            crypto.subtle.importKey("spki", convertPemToBinary($('#kum').val()), encryptAlgorithm, false, ["encrypt"]).
-//            then(function(key) {
-//                // Encrypt K1 with Kupg
-//                crypto.subtle.encrypt({
-//                        name: "RSA-OAEP"
-//                    },
-//                    key,
-//                    k1).
-//                then(function(cipherData) {
-//                        k1_encrypted = new Uint8Array(cipherData);
-//                        console.log("K1_Encrypted", k1_encrypted);
-//                        console.log("merchant_part_encrypted", merchant_part_encrypted);
-//                        var gateway = {
-//                            "k1_encrypted": k1_encrypted,
-//                            "merchant_part_encrypted": merchant_part_encrypted
-//                        };
-//                        return gateway;
-//                }).
-//                then(function(gateway){
-//                    resolve(gateway);
-//                })
-//            })
-//        })
-//    });
-//}
