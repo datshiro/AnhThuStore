@@ -39,6 +39,7 @@ def register():
                       sender=("VCB-Dat Shiro","datshiro@gmail.com"),
                       recipients=[card.email])
         mail.send(message)
+        return render_template('index.html')
 
     return render_template('register.html', form=form)
 
