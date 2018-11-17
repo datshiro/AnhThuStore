@@ -1,6 +1,7 @@
 import base64
 import requests
 from Crypto import Random
+from Crypto.PublicKey import RSA
 from flask import request, make_response, render_template, url_for
 from Crypto.Hash import SHA256
 from flask_mail import Message
@@ -47,7 +48,7 @@ def make_purchase_request():
         authdata_encrypted = aes.encrypt(auth_request)
 
         # Encrypt K3
-        kupg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'].publickey()
+        kupg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'])
         k3_encrypted = encrypt_rsa(kupg, k3)
 
         # Sign hash_authdata
@@ -55,7 +56,6 @@ def make_purchase_request():
         authdata_signature = sign_message(krm, auth_request.encode())
 
         # encrypt k1 with kupg
-        kupg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'].publickey()
         k1_encrypted = encrypt_rsa(kupg, k1)
 
         # Base64 Encode

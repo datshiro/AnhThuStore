@@ -19,8 +19,7 @@ class CertificateHelper(object):
         self.use_type = use_type
 
     def request_certificate(self):
-        response = requests.get(Api.REQUEST_CERTIFICATE,
-                                data={'use_type': self.use_type, 'owner': self.owner})
+        response = requests.get(Api.REQUEST_CERTIFICATE)
 
         if response.status_code != 200:
             return make_response(
@@ -37,6 +36,7 @@ class CertificateHelper(object):
                 'Invalid value to generate certificate: name=' + self.owner + '; use_type=' + self.use_type)
         try:
             cert = CertificateKey.objects.get(key_owner=self.owner, use_type=self.use_type)
+            #TODO: save new cert in database.
             if datetime.utcnow() - cert.created_at > 1:
                 # if key expired
                 cert = self.request_certificate()

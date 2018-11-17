@@ -334,7 +334,7 @@ async function initPurchase(order_info) {
         gateway_part_encrypted = new Uint8Array(encrypted_gateway_part_array);
         // Import Kum pemKey
         k1_encrypted = await encryptKey1(k1);
-        let key_to_encrypt_k2 = await crypto.subtle.importKey("spki", convertPemToBinary($('#kupg').val()), pkcs1Algorithm, false, ["verify"]);
+        let key_to_encrypt_k2 = await crypto.subtle.importKey("spki", convertPemToBinary($('#kupg').val()), encryptAlgorithm, false, ["encrypt"]);
         let encrypted_k2_array = await crypto.subtle.encrypt({
             name: "RSA-OAEP"
         },
@@ -429,11 +429,6 @@ var encryptAlgorithm = {
         name: "SHA-1"
     }
 };
-
-var pkcs1Algorithm = {
-        name: "RSASSA-PKCS1-v1_5",
-        hash: {name: "SHA-1"},
-    }
 
 function arrayBufferToBase64String(arrayBuffer) {
     var byteArray = new Uint8Array(arrayBuffer)
