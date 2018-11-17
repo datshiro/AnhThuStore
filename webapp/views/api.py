@@ -187,7 +187,7 @@ def password():
     authdata_encrypted_k7 = encrypt_aes(k7, authdata.decode())
 
     # Encrypt K7 with Kupg
-    kupg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'].publickey()
+    kupg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'])
     k7_encrypted_kupg = encrypt_rsa(kupg, k7)
 
     # Sign authdata_encrypted_k7 with Krm

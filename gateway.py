@@ -13,6 +13,7 @@ from services.cipher import AESCipher, decrypt_aes, decrypt_rsa, verify_rsa, ds_
 from services.converter import json
 from services.keys import *
 from Crypto import Random
+from Crypto.PublicKey import RSA
 
 app = Flask(__name__)
 
@@ -36,7 +37,7 @@ def send_payment_info():
     authdata_signature = base64.b64decode(b64_authdata_signature)
 
     # decrypt k3
-    krpg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['private_key']
+    krpg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['private_key'])
     k3 = decrypt_rsa(krpg, k3_encrypted)
 
     # decrypt authdata
@@ -60,7 +61,6 @@ def send_payment_info():
     k1_encrypted = base64.b64decode(b64_k1_encrypted)
 
     # Decrypt k2_encrypted
-    krpg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['private_key']
     k2 = decrypt_rsa(krpg, bytes.fromhex(k2_encrypted))
 
     # Decrypt gateway_part_encrypted
@@ -139,7 +139,7 @@ def password():
     iv6 = base64.b64decode(b64_iv6)
 
     # Decrypt K7
-    krpg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['private_key']
+    krpg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['private_key'])
     k7 = decrypt_rsa(krpg, k7_encrypted_kupg)
 
     # Decrypt AuthData
