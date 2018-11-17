@@ -1,5 +1,6 @@
 class BankCertificates(object):
     VCB = "VCB-DATSHIRO"
+    VPB = "VPB-EMILIOANH"
 
 
 class Ports(object):
