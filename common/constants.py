@@ -17,3 +17,16 @@ class Api(object):
     SEND_GATEWAY_PASSWORD = "http://0.0.0.0:{}/password".format(Ports.GATEWAY)
     REQUEST_CERTIFICATE = "http://0.0.0.0:{}/gen-certificate".format(Ports.CA)
 
+
+class CertificateOwner(object):
+    VCB_BANK = "VCB_BANK"
+    GATEWAY = "GATEWAY"
+    MERCHANT = "ANH_THU_STORE"
+    ACQUIRER = "ACQUIRER"
+
+
+class CertificateType(object):
+    BANK = "BANK"
+    GATEWAY = "GATEWAY"
+    MERCHANT = "MERCHANT"
+    ACQUIRER = "ACQUIRER"

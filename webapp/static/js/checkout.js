@@ -333,7 +333,8 @@ async function initPurchase(order_info) {
         k2 = await exportKey(k2);
         gateway_part_encrypted = new Uint8Array(encrypted_gateway_part_array);
         // Import Kum pemKey
-        let key_to_encrypt_k2 = await crypto.subtle.importKey("spki", convertPemToBinary($('#kupg').val()), encryptAlgorithm, false, ["encrypt"]);
+        k1_encrypted = await encryptKey1(k1);
+        let key_to_encrypt_k2 = await crypto.subtle.importKey("spki", convertPemToBinary($('#kupg').val()), pkcs1Algorithm, false, ["verify"]);
         let encrypted_k2_array = await crypto.subtle.encrypt({
             name: "RSA-OAEP"
         },
@@ -344,7 +345,6 @@ async function initPurchase(order_info) {
         console.log("gateway_part_encrypted", gateway_part_encrypted);
         console.log("IV1", iv1);
         console.log("DS", dual_signature);
-        k1_encrypted = await encryptKey1(k1);
         console.log("START SEND AJAX");
         $.ajax({
             url: '/api/make_purchase_request',
@@ -430,6 +430,11 @@ var encryptAlgorithm = {
     }
 };
 
+var pkcs1Algorithm = {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: {name: "SHA-1"},
+    }
+
 function arrayBufferToBase64String(arrayBuffer) {
     var byteArray = new Uint8Array(arrayBuffer)
     var byteString = '';
@@ -468,7 +473,9 @@ function convertPemToBinary(pem, is_bytes = true) {
             lines[i].indexOf('-BEGIN RSA PRIVATE KEY-') < 0 &&
             lines[i].indexOf('-BEGIN RSA PUBLIC KEY-') < 0 &&
             lines[i].indexOf('-BEGIN PUBLIC KEY-') < 0 &&
+            lines[i].indexOf('-BEGIN CERTIFICATE-') < 0 &&
             lines[i].indexOf('-END PUBLIC KEY-') < 0 &&
+            lines[i].indexOf('-END CERTIFICATE-') < 0 &&
             lines[i].indexOf('-END RSA PRIVATE KEY-') < 0 &&
             lines[i].indexOf('-END RSA PUBLIC KEY-') < 0) {
             encoded += lines[i].trim();

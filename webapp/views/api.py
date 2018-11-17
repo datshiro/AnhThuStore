@@ -5,7 +5,7 @@ from flask import request, make_response, render_template, url_for
 from Crypto.Hash import SHA256
 from flask_mail import Message
 
-from common.constants import Api
+from common.constants import Api, CertificateType, CertificateOwner
 from common.messages import ErrorMessages, Messages
 from core.module import Module
 from models.cart import Cart
@@ -14,7 +14,7 @@ from services.cipher import AESCipher, merchant_decrypt_k1, decrypt_aes, ds_chec
 from services.converter import json
 import json as JSON
 
-from services.keys import paymentgateway, merchant
+from services.keys import get_key, merchant
 from settings import SESSION_KEY
 
 module = Module('api', __name__, url_prefix='/api')
@@ -47,7 +47,7 @@ def make_purchase_request():
         authdata_encrypted = aes.encrypt(auth_request)
 
         # Encrypt K3
-        kupg = paymentgateway.publickey()
+        kupg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'].publickey()
         k3_encrypted = encrypt_rsa(kupg, k3)
 
         # Sign hash_authdata
@@ -55,7 +55,7 @@ def make_purchase_request():
         authdata_signature = sign_message(krm, auth_request.encode())
 
         # encrypt k1 with kupg
-        kupg = paymentgateway.publickey()
+        kupg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'].publickey()
         k1_encrypted = encrypt_rsa(kupg, k1)
 
         # Base64 Encode
@@ -187,7 +187,7 @@ def password():
     authdata_encrypted_k7 = encrypt_aes(k7, authdata.decode())
 
     # Encrypt K7 with Kupg
-    kupg = paymentgateway.publickey()
+    kupg = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'].publickey()
     k7_encrypted_kupg = encrypt_rsa(kupg, k7)
 
     # Sign authdata_encrypted_k7 with Krm

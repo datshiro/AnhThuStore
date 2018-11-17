@@ -7,9 +7,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
 
-
 class CertificationAuthority(object):
-
     certificate = None
     prefix = ""
 
@@ -54,6 +52,5 @@ class CertificationAuthority(object):
         )
 
     def get_public_key(self):
-        return self.certificate.public_bytes(
-            encoding=serialization.Encoding.PEM,
-        )
+        return self.public_key.public_bytes(encoding=serialization.Encoding.PEM,
+                                            format=serialization.PublicFormat.PKCS1)

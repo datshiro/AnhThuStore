@@ -1,11 +1,12 @@
 from flask import render_template, flash, request, url_for, make_response
 from werkzeug.utils import redirect
 
+from common.constants import CertificateOwner, CertificateType
 from core.module import Module
 from models.cart import Cart
 from models.product import Product, DoesNotExist
 from services import identity
-from services.keys import merchant, paymentgateway
+from services.keys import merchant, get_key
 
 module = Module('shop', __name__, url_prefix='/shop')
 
@@ -57,7 +58,7 @@ def checkout():
     oi.data['total'] = cart.sum_value
     oi = oi.jsonified_data
     merchant_publickey = merchant.publickey().exportKey()
-    paymentgateway_publickey = paymentgateway.publickey().exportKey()
+    paymentgateway_publickey = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key']
 
     products = cart.products
     return render_template('sites/shop/checkout.html', products=products, cart=cart, oi=oi, kum=merchant_publickey, kupg=paymentgateway_publickey)
