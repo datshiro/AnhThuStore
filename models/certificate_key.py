@@ -1,6 +1,7 @@
 from mongoengine import *
 from datetime import datetime
 
+
 class CertificateKey(Document):
     key_owner = StringField(primary_key=True, max_length=255, verbose_name='Key Owner')
     created_at = DateTimeField(default=datetime.now)

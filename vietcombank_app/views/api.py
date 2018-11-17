@@ -69,6 +69,6 @@ def password():
     try:
         card = Card.objects.get(pk=card_id, password=pwd.decode())
     except DoesNotExist:
-        return make_response(custom_json({'payment_response': 'the otp does not matches'}))
+        return make_response(custom_json({'payment_response': ErrorMessages.FAILED_VERIFY_TRANSACTION}))
 
     return make_response(custom_json({'payment_response': Messages.TRANSACTION_VERIFIED}))

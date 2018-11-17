@@ -15,5 +15,5 @@ class Api(object):
     BANK_AUTHORIZE = "http://0.0.0.0:{}/api/authorization".format(Ports.VCB_BANK)
     SEND_BANK_PASSWORD = "http://0.0.0.0:{}/api/password"   # use format() with relevant bank
     SEND_GATEWAY_PASSWORD = "http://0.0.0.0:{}/password".format(Ports.GATEWAY)
-    REQUEST_CERTIFICATE = "http://0.0.0.0:{}/gen_certificate".format(Ports.CA)
+    REQUEST_CERTIFICATE = "http://0.0.0.0:{}/gen-certificate".format(Ports.CA)
 
