@@ -8,6 +8,8 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 
+from common.constants import CertificateType, CertificateOwner
+
 
 class AESCipher(object):
 
@@ -112,7 +114,8 @@ def ds_check(hashedPart, unhashedPart, ds, k1, iv1, merchant=True):
 
 
 def merchant_decrypt_k1(k1_encrypted):
-    merchant_key = RSA.importKey(open('merchant.pem').read())
+    from services.keys import get_key
+    merchant_key = RSA.importKey(get_key(CertificateOwner.MERCHANT, CertificateType.MERCHANT)['private_key'])
     cipher = PKCS1_OAEP.new(merchant_key)
     k1 = cipher.decrypt(bytes.fromhex(k1_encrypted))
     return k1

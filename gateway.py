@@ -7,15 +7,20 @@ from Crypto.Hash import SHA512, SHA256
 import requests
 import json as JSON
 
-from common.constants import Api, Ports
+from flask_mongoengine import MongoEngine
+
+import settings
+from common.constants import Api, Ports, CertificateOwner, CertificateType
 from common.messages import ErrorMessages
 from services.cipher import AESCipher, decrypt_aes, decrypt_rsa, verify_rsa, ds_check, encrypt_aes, encrypt_rsa, sign_message
 from services.converter import json
 from services.keys import *
 from Crypto import Random
+from Crypto.PublicKey import RSA
 
 app = Flask(__name__)
-
+app.config.from_object(settings)
+db = MongoEngine(app)
 
 @app.route("/send-payment-info", methods=["POST", "GET"])
 def send_payment_info():
@@ -36,7 +41,7 @@ def send_payment_info():
     authdata_signature = base64.b64decode(b64_authdata_signature)
 
     # decrypt k3
-    krpg = paymentgateway
+    krpg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['private_key'])
     k3 = decrypt_rsa(krpg, k3_encrypted)
 
     # decrypt authdata
@@ -44,7 +49,7 @@ def send_payment_info():
     authdata = aes.decrypt(authdata_encrypted)
 
     # verify hash_authdata_signature
-    kum = merchant.publickey()
+    kum = RSA.importKey(get_key(CertificateOwner.MERCHANT, CertificateType.MERCHANT)['public_key'])
 
     if not verify_rsa(kum, authdata, authdata_signature):
         msg = ErrorMessages.FAILED_VERIFY_DATA
@@ -60,7 +65,6 @@ def send_payment_info():
     k1_encrypted = base64.b64decode(b64_k1_encrypted)
 
     # Decrypt k2_encrypted
-    krpg = paymentgateway
     k2 = decrypt_rsa(krpg, bytes.fromhex(k2_encrypted))
 
     # Decrypt gateway_part_encrypted
@@ -139,14 +143,14 @@ def password():
     iv6 = base64.b64decode(b64_iv6)
 
     # Decrypt K7
-    krpg = paymentgateway
+    krpg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['private_key'])
     k7 = decrypt_rsa(krpg, k7_encrypted_kupg)
 
     # Decrypt AuthData
     authdata = AESCipher(k7).decrypt(authdata_encrypted_k7)
 
     # verify authdata_signature
-    kum = merchant.publickey()
+    kum = RSA.importKey(get_key(CertificateOwner.MERCHANT, CertificateType.MERCHANT)['public_key'])
     if not verify_rsa(kum, authdata, authdata_signature):
         msg = ErrorMessages.MISMATCH_DIGEST
         return make_response(json({'message': msg}))
@@ -172,7 +176,7 @@ def password():
     b64_authdata = base64.b64encode(authdata)
     b64_pwd_kuisencrypted = base64.b64encode(pwd_kuis_encrypted)
 
-    bank_response = requests.post(Api.SEND_BANK_PASSWORD,
+    bank_response = requests.post(Api.SEND_BANK_PASSWORD.format(Ports.VCB_BANK),
                                   data={'b64_authdata': b64_authdata,
                                         'b64_pwd_kuisencrypted': b64_pwd_kuisencrypted,
                                         'session_id': session_id})

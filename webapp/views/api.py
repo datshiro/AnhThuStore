@@ -1,11 +1,12 @@
 import base64
 import requests
 from Crypto import Random
+from Crypto.PublicKey import RSA
 from flask import request, make_response, render_template, url_for
 from Crypto.Hash import SHA256
 from flask_mail import Message
 
-from common.constants import Api
+from common.constants import Api, CertificateType, CertificateOwner
 from common.messages import ErrorMessages, Messages
 from core.module import Module
 from models.cart import Cart
@@ -14,7 +15,7 @@ from services.cipher import AESCipher, merchant_decrypt_k1, decrypt_aes, ds_chec
 from services.converter import json
 import json as JSON
 
-from services.keys import paymentgateway, merchant
+from services.keys import get_key
 from settings import SESSION_KEY
 
 module = Module('api', __name__, url_prefix='/api')
@@ -47,15 +48,14 @@ def make_purchase_request():
         authdata_encrypted = aes.encrypt(auth_request)
 
         # Encrypt K3
-        kupg = paymentgateway.publickey()
+        kupg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'])
         k3_encrypted = encrypt_rsa(kupg, k3)
 
         # Sign hash_authdata
-        krm = merchant
+        krm = RSA.importKey(get_key(CertificateOwner.MERCHANT, CertificateType.MERCHANT)['private_key'])
         authdata_signature = sign_message(krm, auth_request.encode())
 
         # encrypt k1 with kupg
-        kupg = paymentgateway.publickey()
         k1_encrypted = encrypt_rsa(kupg, k1)
 
         # Base64 Encode
@@ -166,7 +166,7 @@ def password():
     pwd_kuisencrypted_and_hashed_k6encrypted = data.get('pwd_kuisencrypted_and_hashed_k6encrypted')
 
     # Decrypt K6
-    krm = merchant
+    krm = RSA.importKey(get_key(CertificateOwner.MERCHANT, CertificateType.MERCHANT)['private_key'])
     k6 = merchant_decrypt_k1(k6_encrypted_kum)
 
     # Decrypt Authdata
@@ -187,7 +187,7 @@ def password():
     authdata_encrypted_k7 = encrypt_aes(k7, authdata.decode())
 
     # Encrypt K7 with Kupg
-    kupg = paymentgateway.publickey()
+    kupg = RSA.importKey(get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key'])
     k7_encrypted_kupg = encrypt_rsa(kupg, k7)
 
     # Sign authdata_encrypted_k7 with Krm

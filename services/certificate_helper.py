@@ -1,5 +1,4 @@
-import datetime
-
+from datetime import datetime
 import requests
 from flask import make_response
 
@@ -18,28 +17,37 @@ class CertificateHelper(object):
         self.owner = owner
         self.use_type = use_type
 
-    @classmethod
     def request_certificate(self):
-        response = requests.post(Api.REQUEST_CERTIFICATE)
+        response = requests.get(Api.REQUEST_CERTIFICATE)
 
         if response.status_code != 200:
-            make_response(
-                custom_json({'status': 'NO', 'message': ErrorMessages.FAILED_RENEW_CERTIFICATE.format(self.name)}))
+            return make_response(
+                custom_json({'status': 'NO', 'message': ErrorMessages.FAILED_RENEW_CERTIFICATE.format(self.owner)}))
 
         data = response.json()['data']
-        public_key = data.get('public_key')
-        private_key = data.get('private_key')
-        return public_key, private_key
+        public_key = data.get('public_key').encode()
+        private_key = data.get('private_key').encode()
+        certificate_key = CertificateKey()
+        certificate_key.public_key = public_key
+        certificate_key.private_key = private_key
+        certificate_key.use_type = self.use_type
+        certificate_key.key_owner = self.owner
+        certificate_key.save()
+
+        return {'public_key': public_key, 'private_key': private_key}
 
     def get_cert_key(self):
         if not self.owner and not self.use_type:
-            raise ValueError('Invalid value to generate certificate: name=' + self.owner + '; use_type=' + self.use_type)
+            raise ValueError(
+                'Invalid value to generate certificate: name=' + self.owner + '; use_type=' + self.use_type)
         try:
             cert = CertificateKey.objects.get(key_owner=self.owner, use_type=self.use_type)
-            if datetime.utcnow() - cert.created_at > 1:
-                # Expired Key
+            # TODO: save new cert in database.
+            if datetime.utcnow().day - cert.created_at.day > 1:
+                # if key expired
                 cert = self.request_certificate()
+            else:
+                cert = {'public_key': cert.public_key, 'private_key': cert.private_key}
         except DoesNotExist:
             cert = self.request_certificate()
         return cert
-
