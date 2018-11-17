@@ -18,7 +18,6 @@ db = MongoEngine(app)
 def gen_certificate():
     #Get init info of client
     ca_builder = CertificationAuthority()
-    #fix ca-cert to ca-"username or bank,..."
     private_key = ca_builder.get_private_key()
     public_key = ca_builder.get_public_key()
     return make_response(custom_json(

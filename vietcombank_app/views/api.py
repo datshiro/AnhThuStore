@@ -1,16 +1,17 @@
 import base64
 import json
 
+from Crypto.PublicKey import RSA
 from flask import request, make_response
 
-from common.constants import BankCertificates
+from common.constants import BankCertificates, CertificateOwner, CertificateType
 from common.messages import Messages, ErrorMessages
 from core.module import Module
 from models.bank_session import BankSession
 from models.card import Card, DoesNotExist
 from services.cipher import decrypt_rsa
 from services.converter import json as custom_json
-from services.keys import bank
+from services.keys import get_key
 
 module = Module('api', __name__, url_prefix='/api')
 
@@ -20,7 +21,7 @@ def authorization():
     data = request.form.to_dict()
 
     session_id = data.get('session_id')
-    kuis = bank.publickey().exportKey()
+    kuis = get_key(CertificateOwner.VCB_BANK, CertificateType.BANK)['public_key']
     b64_kuis = base64.b64encode(kuis)
 
     authdata = data.get('authdata')
@@ -60,7 +61,7 @@ def password():
     pwd_kuisencrypted = base64.b64decode(b64_pwd_kuisencrypted)
 
     # Decrypt pwd_kuisencrypted
-    kris = bank
+    kris = RSA.importKey(get_key(CertificateOwner.VCB_BANK, CertificateType.BANK)['private_key'])
     pwd = decrypt_rsa(kris, pwd_kuisencrypted)
 
     bank_session = BankSession.objects.get(pk=session_id)

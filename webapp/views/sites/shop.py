@@ -6,7 +6,7 @@ from core.module import Module
 from models.cart import Cart
 from models.product import Product, DoesNotExist
 from services import identity
-from services.keys import merchant, get_key
+from services.keys import get_key
 
 module = Module('shop', __name__, url_prefix='/shop')
 
@@ -57,7 +57,7 @@ def checkout():
     oi = cart
     oi.data['total'] = cart.sum_value
     oi = oi.jsonified_data
-    merchant_publickey = merchant.publickey().exportKey()
+    merchant_publickey = get_key(CertificateOwner.MERCHANT, CertificateType.MERCHANT)['public_key']
     paymentgateway_publickey = get_key(CertificateOwner.GATEWAY, CertificateType.GATEWAY)['public_key']
 
     products = cart.products
