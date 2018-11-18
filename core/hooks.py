@@ -1,8 +1,8 @@
-from flask import request, session
+from flask import request
 from mongoengine import DoesNotExist
 
 from models.session import Session
-from settings import SESSION_KEY, KUM, KUPG
+from settings import SESSION_KEY
 
 
 def create_or_update_session():
