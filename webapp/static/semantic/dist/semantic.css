@@ -27537,7 +27537,7 @@ Floated Menu / Item
 *******************************/
 
 /*--------------
-      Card
+      VCBBank
 ---------------*/
 
 .ui.cards > .card,
@@ -27616,7 +27616,7 @@ Floated Menu / Item
   visibility: hidden;
 }
 
-/* Consecutive Card Groups Preserve Row Spacing */
+/* Consecutive VCBBank Groups Preserve Row Spacing */
 
 .ui.cards ~ .ui.cards {
   margin-top: 0.875em;
@@ -28269,7 +28269,7 @@ a.ui.card:hover,
 }
 
 /*--------------
-   Card Count
+   VCBBank Count
 ---------------*/
 
 .ui.one.cards {
