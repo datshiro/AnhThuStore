@@ -42,7 +42,6 @@ class CertificateHelper(object):
                 'Invalid value to generate certificate: name=' + self.owner + '; use_type=' + self.use_type)
         try:
             cert = CertificateKey.objects.get(key_owner=self.owner, use_type=self.use_type)
-            # TODO: save new cert in database.
             if datetime.utcnow().day - cert.created_at.day > 1:
                 # if key expired
                 cert = self.request_certificate()

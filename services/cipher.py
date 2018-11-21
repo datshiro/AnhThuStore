@@ -123,18 +123,6 @@ def merchant_decrypt_k1(k1_encrypted):
 
 
 if __name__ == "__main__":
-#     aes = AESCipher()
-#     data = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(255))
-#     print("Data: ", data)
-#     print ("Key: ", aes.key)
-#     e = aes.encrypt(data)
-#     print("Ciphertext: ", [i for i in e])
-#     print("Ciphertext Type: ", e, type(e[0]))
-#     # t = aes.decrypt(e)
-#     iv = [235, 59, 203, 149, 32, 90, 98, 114, 16, 202, 210, 84, 77, 180, 162, 68]
-#     ciphertext = [146, 118, 217, 85, 115, 100, 151, 37, 177, 148, 124, 16, 180, 131, 81, 69]
-#     t = aes.decrypt(bytes(iv + ciphertext))
-#     print("Plaintext: ",t)
 
     pomd = "15aedbab2aa60440a25abee7cfd166d42f6a209d93c9bce8ba19cb5fc67fe409"
     k1 = "a1daafb61e7271ed16f59165a0079d4baeae1e305f10619fc1410d0095827d94"
