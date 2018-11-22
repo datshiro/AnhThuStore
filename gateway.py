@@ -10,7 +10,7 @@ import json as JSON
 from flask_mongoengine import MongoEngine
 
 import settings
-from common.constants import Api, Ports, CertificateOwner, CertificateType
+from common.constants import Api, Ports, CertificateOwner, CertificateType, BankPorts
 from common.messages import ErrorMessages
 from services.cipher import AESCipher, decrypt_aes, decrypt_rsa, verify_rsa, ds_check, encrypt_aes, encrypt_rsa, sign_message
 from services.converter import json
@@ -76,6 +76,8 @@ def send_payment_info():
     oimd = gateway_part.get('oimd')
     ds = gateway_part.get('ds')
 
+    bank_name = JSON.loads(pi).get('bank_name', None)
+
     # Decrypt k1
     k1 = decrypt_rsa(krpg, k1_encrypted)
 
@@ -84,7 +86,7 @@ def send_payment_info():
         return make_response(json({'message': msg}))
 
     # TODO: check pi key "bank_name" to switch for address not http://0.0.0.0:8003/api/authorization
-    response = requests.post(Api.BANK_AUTHORIZE,
+    response = requests.post(Api.BANK_AUTHORIZE.format(BankPorts[bank_name]),
                              data={'authdata': authdata, 'pi': pi, 'session_id': session_id})
 
     if response.status_code != 200:
@@ -133,6 +135,7 @@ def password():
     b64_authdata_encrypted_k7 = data.get('b64_authdata_encrypted_k7')
     b64_k6_encrypted_kupg = data.get('b64_k6_encrypted_kupg')
     b64_iv6 = data.get('b64_iv6')
+    bank_name = data.get('bank_name', None)
 
     # Decode Base64
     pwd_kuis_encrypted_and_hashed_k6encrypted = base64.b64decode(b64_pwd_kuisencrypted_and_hashed_k6encrypted)
@@ -179,7 +182,8 @@ def password():
     bank_response = requests.post(Api.SEND_BANK_PASSWORD.format(Ports.VCB_BANK),
                                   data={'b64_authdata': b64_authdata,
                                         'b64_pwd_kuisencrypted': b64_pwd_kuisencrypted,
-                                        'session_id': session_id})
+                                        'session_id': session_id,
+                                        'bank_name': bank_name})
     if not bank_response.status_code == 200:
         msg = ErrorMessages.FAILED_CONNECT_BANK
         return make_response(json({'message': msg}))

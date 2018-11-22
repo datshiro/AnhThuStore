@@ -17,7 +17,7 @@ from vietcombank_app import settings
 reload(sys)
 mail = Mail()
 
-app = App(__name__, template_folder='./vietcombank_app/templates', static_folder='./webapp/static')
+app = App(__name__, template_folder='./vpbank_app/templates', static_folder='./webapp/static')
 
 app.config.from_object(settings)
 db = MongoEngine(app)
@@ -29,10 +29,10 @@ admin.add_view(ModelView(VCBBank, endpoint='Manage VCBBank'))
 
 mail.init_app(app)
 
-from vietcombank_app.views import home, api
+from vpbank_app.views import home, api
 
 app.register_blueprint(home.module)
 app.register_blueprint(api.module)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=Ports.VCB_BANK)
+    app.run(host="0.0.0.0", port=Ports.VPB_BANK)

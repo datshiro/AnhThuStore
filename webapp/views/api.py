@@ -164,6 +164,7 @@ def password():
     iv6 = data.get('iv6')
     authdata_and_hashed_k6encrypted = data.get('authdata_and_hashed_k6encrypted')
     pwd_kuisencrypted_and_hashed_k6encrypted = data.get('pwd_kuisencrypted_and_hashed_k6encrypted')
+    bank_name = data.get('bank_name', None)
 
     # Decrypt K6
     krm = RSA.importKey(get_key(CertificateOwner.MERCHANT, CertificateType.MERCHANT)['private_key'])
@@ -209,7 +210,8 @@ def password():
                                          'b64_authdata_encrypted_k7': b64_authdata_encrypted_k7,
                                          'b64_k6_encrypted_kupg': b64_k6_encrypted_kupg,
                                          'b64_iv6': b64_iv6,
-                                         'session_id': request.cookies.get(SESSION_KEY)})
+                                         'session_id': request.cookies.get(SESSION_KEY),
+                                         'bank_name': bank_name})
 
     if gateway_response.status_code != 200:
         msg = ErrorMessages.FAILED_CONNECT_GATEWAY
@@ -256,6 +258,8 @@ def password():
                 {'status': 'YES', 'payment_response': payment_response.decode(), 'url': url_for('home.index')}))
             response.set_cookie('cart', cart.jsonified_data)
             return response
+        elif payment_response.decode() == ErrorMessages.NOT_ENOUGH_MONEY:
+            msg = ErrorMessages.NOT_ENOUGH_MONEY
         else:
             msg = ErrorMessages.FAILED_VERIFY_TRANSACTION
-            return make_response(json({'status': 'NO', 'message': msg}))
+        return make_response(json({'status': 'NO', 'message': msg}))

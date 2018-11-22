@@ -7,7 +7,8 @@ class Messages(object):
 
 
 class ErrorMessages(object):
-    INVALID_CARD = "Invalid Card ID"
+    NOT_ENOUGH_MONEY = "Transaction failed!\nNot enough money in account"
+    INVALID_CARD = "Invalid VCBBank ID"
     INVALID_AUTH_REQUEST = 'unknown authrequest'
     MISMATCH_DIGEST = "message went wrong during transmission, hashes don't match"
 
