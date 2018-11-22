@@ -66,9 +66,15 @@ def password():
 
     bank_session = BankSession.objects.get(pk=session_id)
     card_id = bank_session.data.get('card_id')
+    total_amount = bank_session.data.get('total_amount', 0)
 
     try:
         card = VCBBank.objects.get(pk=card_id, password=pwd.decode())
+        if total_amount < card.money:
+            card.money -= total_amount
+            card.save()
+        else:
+            return make_response(custom_json({'payment_response': ErrorMessages.NOT_ENOUGH_MONEY}))
     except DoesNotExist:
         return make_response(custom_json({'payment_response': ErrorMessages.FAILED_VERIFY_TRANSACTION}))
 

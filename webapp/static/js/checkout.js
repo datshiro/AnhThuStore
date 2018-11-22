@@ -68,11 +68,13 @@ async function initPurchase(order_info) {
     };
 
     oi = JSON.stringify(order_info);
+
+    payment_info.total_amount = order_info.total;
     pi = JSON.stringify(payment_info);
 
     // Create Dual Signature
     oi_array = encode_info(order_info);
-    pi_array = encode_info(payment_info)
+    pi_array = encode_info(payment_info);
 
     var pimd = "";
     var oimd = "";

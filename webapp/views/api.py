@@ -258,6 +258,8 @@ def password():
                 {'status': 'YES', 'payment_response': payment_response.decode(), 'url': url_for('home.index')}))
             response.set_cookie('cart', cart.jsonified_data)
             return response
+        elif payment_response.decode() == ErrorMessages.NOT_ENOUGH_MONEY:
+            msg = ErrorMessages.NOT_ENOUGH_MONEY
         else:
             msg = ErrorMessages.FAILED_VERIFY_TRANSACTION
-            return make_response(json({'status': 'NO', 'message': msg}))
+        return make_response(json({'status': 'NO', 'message': msg}))
