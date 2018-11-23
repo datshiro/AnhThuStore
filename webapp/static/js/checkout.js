@@ -35,192 +35,7 @@ function concateArray(a, b) {
     return c;
 }
 
-
-function makePurchaseRequest(oi) {
-    var data = "Hello World";
-    var enc = new TextEncoder(); // always utf-8
-    var array_data = enc.encode(data);
-    var iv = window.crypto.getRandomValues(new Uint8Array(16));
-    iv_hex = arrayToHex(iv);
-    var ciphertext_array = "";
-    var plaintext_array = "";
-    var key_hex = "";
-    var ciphertext_hex = "";
-    function encrypt() {
-        window.crypto.subtle.generateKey(
-            {
-                name: "AES-CBC",
-                length: 256, //can be  128, 192, or 256
-            },
-            true, //whether the key is extractable (i.e. can be used in exportKey)
-            ["encrypt", "decrypt"] //can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
-        )
-            .then(function (k) {
-                key = k;
-            })
-            .then(function () {
-                window.crypto.subtle.encrypt(
-                    {
-                        name: "AES-CBC",
-                        iv: iv,
-                    },
-                    key, //from generateKey or importKey above
-                    array_data //ArrayBuffer of data you want to encrypt
-                )
-                    .then(function (encrypted) {
-                        //returns an ArrayBuffer containing the encrypted data
-                        ciphertext_array = new Uint8Array(encrypted);
-                        console.log("Ciphertext: ", ciphertext_array);
-                        ciphertext_hex = arrayToHex(ciphertext_array);
-                        return ciphertext_hex;
-                    })
-                    .then(function (result) {
-                        window.crypto.subtle.exportKey(
-                            "raw", //can be "jwk" or "raw"
-                            key //extractable must be true
-                        )
-                            .then(function (keydata) {
-                                var bufView = new Uint8Array(keydata);
-                                key_array = bufView;
-                                console.log("Key: ", key_array);
-                                key_hex = arrayToHex(key_array);
-
-                            })
-                    })
-                    .then(function (result) {
-                        decrypt()
-                    })
-                    .then(function (result) {
-                        // Create Dual Signature
-                        oi_array = encode_info(order_info);
-                        pi_array = encode_info(payment_info)
-                        var pimd = "";
-                        var oimd = "";
-                        var pomd = "";
-
-                        window.crypto.subtle.digest(
-                            {
-                                name: "SHA-256",
-                            },
-                            oi_array //The data you want to hash as an ArrayBuffer
-                        )
-                            .then(function (hash) {
-                                oimd = new Uint8Array(hash);
-                            })
-                            .then(function (result) {
-                                window.crypto.subtle.digest(
-                                    {
-                                        name: "SHA-256",
-                                    },
-                                    pi_array //The data you want to hash as an ArrayBuffer
-                                )
-                                    .then(function (hash) {
-                                        pimd = new Uint8Array(hash);
-                                        return pimd;
-                                    })
-                                    .then(function (result) {
-                                        console.log(result);
-                                        po = concateArray(oimd, pimd);
-                                        window.crypto.subtle.digest(
-                                            {
-                                                name: "SHA-256",
-                                            },
-                                            po //The data you want to hash as an ArrayBuffer
-                                        )
-                                            .then(function (hash) {
-                                                pomd = new Uint8Array(hash);
-                                                pomd = arrayToHex(pimd)
-                                                oimd = arrayToHex(oimd)
-                                                pimd = arrayToHex(pimd)
-                                                console.log("POMD: ", pomd);
-                                                return pomd;
-                                            })
-                                            .then(function (result) {
-                                                console.log("R: ", result);
-                                            })
-                                            .catch(function (err) {
-                                                console.error(err);
-                                            });
-                                    })
-                            })
-                            .catch(function (err) {
-                                console.error(err);
-                            });
-
-                    })
-                    .then(function (result) {
-                        console.log("RESULT: ", result);
-                    })
-                    .catch(function (err) {
-                        console.error(err);
-                    });
-            })
-            .catch(function (err) {
-                console.error(err);
-            });
-    }
-
-    function decrypt() {
-        console.log("K: ", key);
-        console.log("iv", iv);
-        console.log("ciphertext", ciphertext_array);
-        window.crypto.subtle.decrypt(
-            {
-                name: "AES-CBC",
-                iv: iv, //The initialization vector you used to encrypt
-            },
-            key, //from generateKey or importKey above
-            ciphertext_array //ArrayBuffer of the data
-        )
-            .then(function (decrypted) {
-                //returns an ArrayBuffer containing the decrypted data
-                console.log("Decrypted data: " + new Uint8Array(decrypted));
-                console.log(new Uint8Array(decrypted));
-                plaintext_array = new Uint8Array(decrypted);
-                var enc = new TextDecoder("utf-8");
-
-                console.log("Decrypted decoded-data: " + enc.decode(new Uint8Array(decrypted)));
-
-            })
-            .catch(function (err) {
-                console.error(err);
-            });
-    }
-    setTimeout(encrypt, 100);
-    //    setTimeout(decrypt,500);
-    // Export Key
-
-    var card_id = $("input[name=card-id]").val();
-    setTimeout(function () {
-        $.ajax({
-            url: '/api/make_purchase_request',
-            data: {
-                "key": key_hex,
-                "iv": iv_hex,
-                "ciphertext": ciphertext_hex,
-                "card-id": card_id
-            },
-            dataType: "json",
-            type: 'POST',
-            success: function (response) {
-                if (response.data.status == "NO") {
-                    alert("Không thanh toán đươc, hãy kiểm tra lại thông tin!");
-                    //                    finished();
-                    return false;
-                } else {
-                    alert("Cám ơn " + " đã mua hàng. Chúng tôi sẽ liên lạc để xác nhận và giao hàng nhanh nhất trong thời gian tới!");
-                    //                    window.location.href = response.data.url;hang
-                    //                    finished();
-                }
-            },
-            error: function (error) {
-                console.log("error");
-                //                finished();
-            }
-        });
-    }, 2000);
-}
-
+var order_id = $("#order-id").text();
 var order_id = $("#order-id").text();
 var order_sum = $('#order-sum').text();
 var order_info = {
@@ -253,11 +68,13 @@ async function initPurchase(order_info) {
     };
 
     oi = JSON.stringify(order_info);
+
+    payment_info.total_amount = order_info.total;
     pi = JSON.stringify(payment_info);
 
     // Create Dual Signature
     oi_array = encode_info(order_info);
-    pi_array = encode_info(payment_info)
+    pi_array = encode_info(payment_info);
 
     var pimd = "";
     var oimd = "";
@@ -333,6 +150,7 @@ async function initPurchase(order_info) {
         k2 = await exportKey(k2);
         gateway_part_encrypted = new Uint8Array(encrypted_gateway_part_array);
         // Import Kum pemKey
+        k1_encrypted = await encryptKey1(k1);
         let key_to_encrypt_k2 = await crypto.subtle.importKey("spki", convertPemToBinary($('#kupg').val()), encryptAlgorithm, false, ["encrypt"]);
         let encrypted_k2_array = await crypto.subtle.encrypt({
             name: "RSA-OAEP"
@@ -344,7 +162,6 @@ async function initPurchase(order_info) {
         console.log("gateway_part_encrypted", gateway_part_encrypted);
         console.log("IV1", iv1);
         console.log("DS", dual_signature);
-        k1_encrypted = await encryptKey1(k1);
         console.log("START SEND AJAX");
         $.ajax({
             url: '/api/make_purchase_request',
@@ -379,7 +196,7 @@ async function initPurchase(order_info) {
                         var kuis = atob(response.data.b64_kuis);
 
                         bankcertificate = new TextDecoder().decode(bankcertificate);
-                        if (bankcertificate != 'VCB-DATSHIRO') {
+                        if (bankcertificate != 'VCB-DATSHIRO' && bankcertificate != 'VPB-EMILIOANH') {
                             alert("Failed Transaction! Please Try Again!");
                             return;
                         }
@@ -468,7 +285,9 @@ function convertPemToBinary(pem, is_bytes = true) {
             lines[i].indexOf('-BEGIN RSA PRIVATE KEY-') < 0 &&
             lines[i].indexOf('-BEGIN RSA PUBLIC KEY-') < 0 &&
             lines[i].indexOf('-BEGIN PUBLIC KEY-') < 0 &&
+            lines[i].indexOf('-BEGIN CERTIFICATE-') < 0 &&
             lines[i].indexOf('-END PUBLIC KEY-') < 0 &&
+            lines[i].indexOf('-END CERTIFICATE-') < 0 &&
             lines[i].indexOf('-END RSA PRIVATE KEY-') < 0 &&
             lines[i].indexOf('-END RSA PUBLIC KEY-') < 0) {
             encoded += lines[i].trim();
@@ -708,6 +527,7 @@ function send_password(password, kuis) {
             var authdata_and_hashed_k6encrypted = "";
             var kupg = $('#kupg').val();
             var kum = $('#kum').val();
+            var bank_name = $("select[name=bank-name]").val();
 
             // Encrypt Password
             encrypt_rsa(kuis, password).then(function (encrypted) {
@@ -776,6 +596,7 @@ function send_password(password, kuis) {
                                                                         "iv6": arrayToHex(iv6),
                                                                         "authdata_and_hashed_k6encrypted": arrayToHex(authdata_and_hashed_k6encrypted),
                                                                         "pwd_kuisencrypted_and_hashed_k6encrypted": arrayToHex(pwd_kuisencrypted_and_hashed_k6encrypted),
+                                                                        "bank_name": bank_name
                                                                     },
                                                                     dataType: "json",
                                                                     type: 'POST',

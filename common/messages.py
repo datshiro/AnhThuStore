@@ -7,13 +7,15 @@ class Messages(object):
 
 
 class ErrorMessages(object):
-    INVALID_CARD = "Invalid Card ID"
+    NOT_ENOUGH_MONEY = "Transaction failed!\nNot enough money in account"
+    INVALID_CARD = "Invalid VCBBank ID"
     INVALID_AUTH_REQUEST = 'unknown authrequest'
     MISMATCH_DIGEST = "message went wrong during transmission, hashes don't match"
 
     FAILED_CONNECT_BANK = "Can't communicate with issue banker"
     FAILED_CONNECT_GATEWAY = "Can't communicate with gateway"
     FAILED_BANKING_AUTHORIZE = "Failed to authorize with bank"
+    FAILED_RENEW_CERTIFICATE = "{} Failed to renew certificate"
 
     FAILED_VERIFY_DATA = "Data went wrong during transmission, failed to verify signature"
     FAILED_VERIFY_TRANSACTION = "the otp does not matches"

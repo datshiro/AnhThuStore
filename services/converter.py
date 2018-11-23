@@ -31,6 +31,7 @@ def decodeBase64(string):
 def encodeBase64(bytestring):
     return base64.b64encode(bytestring)
 
+
 def json(data):
     """
     This is the function, which return json data

@@ -6,7 +6,7 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='semantic/dist/semantic.min.css') }}">
     <script src="{{ url_for('static', filename='semantic/dist/semantic.min.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/sites/vietcombank/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <title>Vietcombank</title>
 </head>
 <body>
@@ -18,22 +18,24 @@
         </a>
     </div>
     <div class="ui container">
-        <h1>Welcome to Vietcombank Website</h1>
+        <h1>Profile Detail</h1>
+        <div class="wrapper">
+            <h2>Hello {{ card.name }}</h2>
+            <h2>Số dư: {{ card.money | price }} VND</h2>
+        </div>
         <div class="form-wrapper">
-            <h2>Please login to check your acount info</h2>
-            <form method="POST" class="ui form" action=" ">
+            <h2>Topup Money</h2>
+            <form method="POST" class="ui form" action="{{ url_for ('home.topup') }} ">
                 <div class="inline fields">
                     <label for="card-id">Card ID :  </label>
-                    <input name="card-id" class="ui input" id="card-id" type="text">
+                    <input type="text" name="card-id" class="ui input" value="{{ card.id }}">
                 </div>
-
                 <div class="inline fields">
-                    <label for="password">Password: </label>
-                    <input name="password" class="ui input" id="password" type="password">
+                    <label for="topup-money">Amount :  </label>
+                    <input type="number" name="topup-money" class="ui input">
                 </div>
                 <div class="group-button">
-                    <a href="{{ url_for ('home.register') }}" class="ui button secondary register-btn">Register</a>
-                    <button class="ui button primary login-btn" type="submit">Login</button>
+                    <button class="ui button secondary register-btn" type="submit">Topup</button>
                 </div>
             </form>
         </div>
