@@ -196,7 +196,7 @@ async function initPurchase(order_info) {
                         var kuis = atob(response.data.b64_kuis);
 
                         bankcertificate = new TextDecoder().decode(bankcertificate);
-                        if (bankcertificate != 'VCB-DATSHIRO') {
+                        if (bankcertificate != 'VCB-DATSHIRO' && bankcertificate != 'VPB-EMILIOANH') {
                             alert("Failed Transaction! Please Try Again!");
                             return;
                         }

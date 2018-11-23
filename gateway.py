@@ -179,7 +179,7 @@ def password():
     b64_authdata = base64.b64encode(authdata)
     b64_pwd_kuisencrypted = base64.b64encode(pwd_kuis_encrypted)
 
-    bank_response = requests.post(Api.SEND_BANK_PASSWORD.format(Ports.VCB_BANK),
+    bank_response = requests.post(Api.SEND_BANK_PASSWORD.format(BankPorts[bank_name]),
                                   data={'b64_authdata': b64_authdata,
                                         'b64_pwd_kuisencrypted': b64_pwd_kuisencrypted,
                                         'session_id': session_id,

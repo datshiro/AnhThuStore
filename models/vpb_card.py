@@ -7,7 +7,7 @@ from hashlib import md5
 
 
 def id_generator(size=13, chars=string.ascii_uppercase + string.digits):
-    id = "VCB" + ''.join(random.choice(chars) for _ in range(size))
+    id = "VPB" + ''.join(random.choice(chars) for _ in range(size))
     return id
 
 
