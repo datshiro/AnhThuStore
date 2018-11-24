@@ -3,7 +3,7 @@ from flask_mail import Message
 from werkzeug.utils import redirect
 
 from core.module import Module
-from models.vcb_card import VCBBank
+from models.vpb_card import VPBBank, NotUniqueError
 from vietcombank_app.forms import RegisterForm
 
 module = Module('home', __name__)
@@ -16,7 +16,7 @@ def index():
         card_id = data.get('card-id')
         password = data.get('password')
 
-        card = VCBBank.authenticate(card_id, password)
+        card = VPBBank.authenticate(card_id, password)
         if card:
             return render_template('profile.html', card=card)
     return render_template('index.html')
@@ -29,15 +29,15 @@ def register():
         data = (request.form).to_dict()
         data.pop('csrf_token', None)
 
-        card = VCBBank(**data)
+        card = VPBBank(**data)
         card.save()
 
         from vietcombank import mail
         msg = render_template('register-email.html', card=card)
-        message = Message(subject="Đăng ký thành công thẻ VCB-Dat Shiro",
-                      html=msg,
-                      sender=("VCB-Dat Shiro","datshiro@gmail.com"),
-                      recipients=[card.email])
+        message = Message(subject="Đăng ký thành công thẻ VPB-EMILIOANH",
+                          html=msg,
+                          sender=("VPB-Emilio Anh", "datshiro@gmail.com"),
+                          recipients=[card.email])
         mail.send(message)
         return render_template('index.html')
 
@@ -51,6 +51,6 @@ def topup():
         card_id = data.get('card-id')
         topup_amount = data.get('topup-money')
 
-        card = VCBBank.objects.get(pk=card_id)
+        card = VPBBank.objects.get(pk=card_id)
         card.topup(float(topup_amount))
     return redirect(url_for('home.index'))
